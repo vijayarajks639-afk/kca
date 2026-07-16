@@ -1,0 +1,37 @@
+{
+  "realm": "kca",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "credit-officer",
+        "description": "Reviews and disposes credit-decline explanations"
+      },
+      {
+        "name": "domain-steward",
+        "description": "Owns semantics, golden sets, abstention rules"
+      },
+      {
+        "name": "auditor",
+        "description": "Reads inference ledger and reconstruction reports"
+      },
+      {
+        "name": "op-risk-investigator",
+        "description": "Operational-risk investigation authority (Sprint 5)"
+      },
+      {
+        "name": "unauthorised-user",
+        "description": "Negative-test role: no data grants"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "kca-platform",
+      "publicClient": false,
+      "secret": "dev-only-secret",
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true
+    }
+  ]
+}

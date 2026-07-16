@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: kca
+      POSTGRES_PASSWORD: kca
+      POSTGRES_DB: kca
+    ports: ['5432:5432']
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'kca']
+      interval: 5s
+      retries: 10
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./keycloak/realm-kca.json:/opt/keycloak/data/import/realm-kca.json:ro
+    ports: ['8080:8080']

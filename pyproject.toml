@@ -1,0 +1,27 @@
+[project]
+name = "kca"
+version = "0.1.0"
+description = "KCA — Knowledge & Context Architecture prototype (federated enterprise AI platform)"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "pydantic>=2.8",
+  "anthropic>=0.40",
+  "sqlalchemy>=2.0",
+  "alembic>=1.13",
+  "psycopg[binary]>=3.2",
+  "pgvector>=0.3",
+  "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.6", "respx>=0.21"]
+orchestrator = ["langgraph>=0.2"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["contracts", "platform", "dips", "services", "evals", "data"]
