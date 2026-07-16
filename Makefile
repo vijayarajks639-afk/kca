@@ -13,4 +13,7 @@ downgrade:
 test:
 	ruff check . && pytest -q
 
-.PHONY: up down migrate downgrade test
+schemas:
+	python -m contracts.export_schemas
+
+.PHONY: up down migrate downgrade test schemas
