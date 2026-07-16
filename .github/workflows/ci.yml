@@ -23,5 +23,6 @@ jobs:
         with: { python-version: '3.12' }
       - run: pip install -e ".[dev]"
       - run: ruff check .
-      - run: pytest -q
+      # exit code 5 = no tests collected; passes until WP-02 adds the first tests
+      - run: pytest -q || test $? -eq 5
       # eval gate lands with WP-18: evals/harness blocks merge on golden-set regression
