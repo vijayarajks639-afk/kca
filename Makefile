@@ -7,4 +7,7 @@ down:
 test:
 	ruff check . && pytest -q
 
-.PHONY: up down test
+schemas:
+	python -m contracts.export_schemas
+
+.PHONY: up down test schemas
