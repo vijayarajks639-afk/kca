@@ -1,0 +1,35 @@
+[
+  {
+    "policy_id": "policy/credit/uk-mortgage",
+    "version": "v1",
+    "title": "Credit policy v1",
+    "effective_from": "2025-06-01",
+    "effective_to": "2026-01-14",
+    "max_ltv": 0.85,
+    "collateral_haircut": 0.25,
+    "referral_floor_score": 580,
+    "summary": "Initial policy: 85% max LTV, 25% collateral haircut, referral floor 580."
+  },
+  {
+    "policy_id": "policy/credit/uk-mortgage",
+    "version": "v2",
+    "title": "Credit policy v2 \u2014 tightened collateral treatment",
+    "effective_from": "2026-01-15",
+    "effective_to": "2026-03-31",
+    "max_ltv": 0.8,
+    "collateral_haircut": 0.35,
+    "referral_floor_score": 600,
+    "summary": "Tightened: 80% max LTV, 35% collateral haircut, referral floor 600."
+  },
+  {
+    "policy_id": "policy/credit/uk-mortgage",
+    "version": "v3",
+    "title": "Credit policy v3 \u2014 partial relaxation",
+    "effective_from": "2026-04-01",
+    "effective_to": null,
+    "max_ltv": 0.82,
+    "collateral_haircut": 0.3,
+    "referral_floor_score": 620,
+    "summary": "Relaxed: 82% max LTV, 30% collateral haircut, referral floor 620."
+  }
+]

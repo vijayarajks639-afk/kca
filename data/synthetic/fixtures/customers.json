@@ -1,0 +1,177 @@
+[
+  {
+    "customer_id": "cust-88231",
+    "name": "Meera Shah",
+    "segment": "retail",
+    "jurisdiction": "GB",
+    "annual_income": 52000.0
+  },
+  {
+    "customer_id": "cust-1001",
+    "name": "Dev Adeyemi",
+    "segment": "private-banking",
+    "jurisdiction": "US",
+    "annual_income": 90500.0
+  },
+  {
+    "customer_id": "cust-1002",
+    "name": "Ben Adeyemi",
+    "segment": "retail",
+    "jurisdiction": "GB",
+    "annual_income": 87500.0
+  },
+  {
+    "customer_id": "cust-1003",
+    "name": "Sam Iyer",
+    "segment": "retail",
+    "jurisdiction": "GB",
+    "annual_income": 206500.0
+  },
+  {
+    "customer_id": "cust-1004",
+    "name": "Olga Dubois",
+    "segment": "sme",
+    "jurisdiction": "GB",
+    "annual_income": 169000.0
+  },
+  {
+    "customer_id": "cust-1005",
+    "name": "Mara Iyer",
+    "segment": "sme",
+    "jurisdiction": "DE",
+    "annual_income": 121000.0
+  },
+  {
+    "customer_id": "cust-1006",
+    "name": "Rosa Haines",
+    "segment": "retail",
+    "jurisdiction": "US",
+    "annual_income": 125000.0
+  },
+  {
+    "customer_id": "cust-1007",
+    "name": "Sam Khan",
+    "segment": "retail",
+    "jurisdiction": "DE",
+    "annual_income": 155500.0
+  },
+  {
+    "customer_id": "cust-1008",
+    "name": "Elena Patel",
+    "segment": "retail",
+    "jurisdiction": "GB",
+    "annual_income": 56000.0
+  },
+  {
+    "customer_id": "cust-1009",
+    "name": "Tara Okafor",
+    "segment": "private-banking",
+    "jurisdiction": "US",
+    "annual_income": 169500.0
+  },
+  {
+    "customer_id": "cust-1010",
+    "name": "Dev Jansen",
+    "segment": "sme",
+    "jurisdiction": "GB",
+    "annual_income": 144000.0
+  },
+  {
+    "customer_id": "cust-1011",
+    "name": "Jonas Garcia",
+    "segment": "retail",
+    "jurisdiction": "US",
+    "annual_income": 69000.0
+  },
+  {
+    "customer_id": "cust-1012",
+    "name": "Hugo Brown",
+    "segment": "retail",
+    "jurisdiction": "DE",
+    "annual_income": 48000.0
+  },
+  {
+    "customer_id": "cust-1013",
+    "name": "Rosa Fischer",
+    "segment": "sme",
+    "jurisdiction": "DE",
+    "annual_income": 183000.0
+  },
+  {
+    "customer_id": "cust-1014",
+    "name": "Hugo Costa",
+    "segment": "sme",
+    "jurisdiction": "GB",
+    "annual_income": 178500.0
+  },
+  {
+    "customer_id": "cust-1015",
+    "name": "Ben Khan",
+    "segment": "retail",
+    "jurisdiction": "DE",
+    "annual_income": 88500.0
+  },
+  {
+    "customer_id": "cust-1016",
+    "name": "Nikhil Okafor",
+    "segment": "private-banking",
+    "jurisdiction": "GB",
+    "annual_income": 200000.0
+  },
+  {
+    "customer_id": "cust-1017",
+    "name": "Rosa Okafor",
+    "segment": "retail",
+    "jurisdiction": "US",
+    "annual_income": 74500.0
+  },
+  {
+    "customer_id": "cust-1018",
+    "name": "Farid Novak",
+    "segment": "sme",
+    "jurisdiction": "US",
+    "annual_income": 82500.0
+  },
+  {
+    "customer_id": "cust-1019",
+    "name": "Jonas Garcia",
+    "segment": "retail",
+    "jurisdiction": "DE",
+    "annual_income": 216000.0
+  },
+  {
+    "customer_id": "cust-1020",
+    "name": "Ben Costa",
+    "segment": "retail",
+    "jurisdiction": "GB",
+    "annual_income": 180000.0
+  },
+  {
+    "customer_id": "cust-1021",
+    "name": "Tara Costa",
+    "segment": "sme",
+    "jurisdiction": "DE",
+    "annual_income": 177000.0
+  },
+  {
+    "customer_id": "cust-1022",
+    "name": "Asha Okafor",
+    "segment": "private-banking",
+    "jurisdiction": "DE",
+    "annual_income": 53500.0
+  },
+  {
+    "customer_id": "cust-1023",
+    "name": "Liam Jansen",
+    "segment": "retail",
+    "jurisdiction": "US",
+    "annual_income": 167000.0
+  },
+  {
+    "customer_id": "cust-1024",
+    "name": "Tara Garcia",
+    "segment": "private-banking",
+    "jurisdiction": "US",
+    "annual_income": 80000.0
+  }
+]

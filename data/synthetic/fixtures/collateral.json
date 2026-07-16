@@ -1,0 +1,254 @@
+[
+  {
+    "collateral_id": "col-88231",
+    "facility_id": "fac-88231",
+    "collateral_type": "residential-property",
+    "valuation": 400000.0,
+    "valuation_date": "2026-03-01"
+  },
+  {
+    "collateral_id": "col-1001-0",
+    "facility_id": "fac-1001-0",
+    "collateral_type": "deposit",
+    "valuation": 844000.0,
+    "valuation_date": "2025-07-13"
+  },
+  {
+    "collateral_id": "col-1002-0",
+    "facility_id": "fac-1002-0",
+    "collateral_type": "deposit",
+    "valuation": 293000.0,
+    "valuation_date": "2025-11-09"
+  },
+  {
+    "collateral_id": "col-1003-0",
+    "facility_id": "fac-1003-0",
+    "collateral_type": "deposit",
+    "valuation": 374000.0,
+    "valuation_date": "2025-09-19"
+  },
+  {
+    "collateral_id": "col-1003-1",
+    "facility_id": "fac-1003-1",
+    "collateral_type": "residential-property",
+    "valuation": 457000.0,
+    "valuation_date": "2025-06-25"
+  },
+  {
+    "collateral_id": "col-1004-0",
+    "facility_id": "fac-1004-0",
+    "collateral_type": "residential-property",
+    "valuation": 733000.0,
+    "valuation_date": "2026-01-02"
+  },
+  {
+    "collateral_id": "col-1004-1",
+    "facility_id": "fac-1004-1",
+    "collateral_type": "residential-property",
+    "valuation": 767000.0,
+    "valuation_date": "2025-06-30"
+  },
+  {
+    "collateral_id": "col-1005-0",
+    "facility_id": "fac-1005-0",
+    "collateral_type": "commercial-property",
+    "valuation": 453000.0,
+    "valuation_date": "2025-09-09"
+  },
+  {
+    "collateral_id": "col-1006-0",
+    "facility_id": "fac-1006-0",
+    "collateral_type": "residential-property",
+    "valuation": 745000.0,
+    "valuation_date": "2026-01-24"
+  },
+  {
+    "collateral_id": "col-1006-1",
+    "facility_id": "fac-1006-1",
+    "collateral_type": "commercial-property",
+    "valuation": 122000.0,
+    "valuation_date": "2025-08-21"
+  },
+  {
+    "collateral_id": "col-1007-0",
+    "facility_id": "fac-1007-0",
+    "collateral_type": "vehicle",
+    "valuation": 748000.0,
+    "valuation_date": "2026-01-31"
+  },
+  {
+    "collateral_id": "col-1007-1",
+    "facility_id": "fac-1007-1",
+    "collateral_type": "commercial-property",
+    "valuation": 688000.0,
+    "valuation_date": "2025-12-23"
+  },
+  {
+    "collateral_id": "col-1008-0",
+    "facility_id": "fac-1008-0",
+    "collateral_type": "deposit",
+    "valuation": 253000.0,
+    "valuation_date": "2025-11-21"
+  },
+  {
+    "collateral_id": "col-1009-0",
+    "facility_id": "fac-1009-0",
+    "collateral_type": "vehicle",
+    "valuation": 828000.0,
+    "valuation_date": "2025-11-23"
+  },
+  {
+    "collateral_id": "col-1010-0",
+    "facility_id": "fac-1010-0",
+    "collateral_type": "residential-property",
+    "valuation": 826000.0,
+    "valuation_date": "2025-12-11"
+  },
+  {
+    "collateral_id": "col-1011-0",
+    "facility_id": "fac-1011-0",
+    "collateral_type": "vehicle",
+    "valuation": 421000.0,
+    "valuation_date": "2025-11-01"
+  },
+  {
+    "collateral_id": "col-1012-0",
+    "facility_id": "fac-1012-0",
+    "collateral_type": "deposit",
+    "valuation": 587000.0,
+    "valuation_date": "2025-12-26"
+  },
+  {
+    "collateral_id": "col-1013-0",
+    "facility_id": "fac-1013-0",
+    "collateral_type": "vehicle",
+    "valuation": 642000.0,
+    "valuation_date": "2025-07-28"
+  },
+  {
+    "collateral_id": "col-1013-1",
+    "facility_id": "fac-1013-1",
+    "collateral_type": "commercial-property",
+    "valuation": 777000.0,
+    "valuation_date": "2025-10-03"
+  },
+  {
+    "collateral_id": "col-1014-0",
+    "facility_id": "fac-1014-0",
+    "collateral_type": "residential-property",
+    "valuation": 315000.0,
+    "valuation_date": "2025-11-16"
+  },
+  {
+    "collateral_id": "col-1015-0",
+    "facility_id": "fac-1015-0",
+    "collateral_type": "deposit",
+    "valuation": 587000.0,
+    "valuation_date": "2025-12-07"
+  },
+  {
+    "collateral_id": "col-1015-1",
+    "facility_id": "fac-1015-1",
+    "collateral_type": "deposit",
+    "valuation": 506000.0,
+    "valuation_date": "2026-01-07"
+  },
+  {
+    "collateral_id": "col-1016-0",
+    "facility_id": "fac-1016-0",
+    "collateral_type": "commercial-property",
+    "valuation": 502000.0,
+    "valuation_date": "2025-07-05"
+  },
+  {
+    "collateral_id": "col-1017-0",
+    "facility_id": "fac-1017-0",
+    "collateral_type": "residential-property",
+    "valuation": 345000.0,
+    "valuation_date": "2025-09-27"
+  },
+  {
+    "collateral_id": "col-1017-1",
+    "facility_id": "fac-1017-1",
+    "collateral_type": "commercial-property",
+    "valuation": 757000.0,
+    "valuation_date": "2025-06-14"
+  },
+  {
+    "collateral_id": "col-1018-0",
+    "facility_id": "fac-1018-0",
+    "collateral_type": "deposit",
+    "valuation": 150000.0,
+    "valuation_date": "2026-02-04"
+  },
+  {
+    "collateral_id": "col-1018-1",
+    "facility_id": "fac-1018-1",
+    "collateral_type": "commercial-property",
+    "valuation": 523000.0,
+    "valuation_date": "2025-09-03"
+  },
+  {
+    "collateral_id": "col-1019-0",
+    "facility_id": "fac-1019-0",
+    "collateral_type": "commercial-property",
+    "valuation": 411000.0,
+    "valuation_date": "2025-12-18"
+  },
+  {
+    "collateral_id": "col-1020-0",
+    "facility_id": "fac-1020-0",
+    "collateral_type": "residential-property",
+    "valuation": 330000.0,
+    "valuation_date": "2025-11-27"
+  },
+  {
+    "collateral_id": "col-1021-0",
+    "facility_id": "fac-1021-0",
+    "collateral_type": "vehicle",
+    "valuation": 357000.0,
+    "valuation_date": "2026-02-13"
+  },
+  {
+    "collateral_id": "col-1021-1",
+    "facility_id": "fac-1021-1",
+    "collateral_type": "residential-property",
+    "valuation": 224000.0,
+    "valuation_date": "2025-09-25"
+  },
+  {
+    "collateral_id": "col-1022-0",
+    "facility_id": "fac-1022-0",
+    "collateral_type": "commercial-property",
+    "valuation": 308000.0,
+    "valuation_date": "2025-11-08"
+  },
+  {
+    "collateral_id": "col-1023-0",
+    "facility_id": "fac-1023-0",
+    "collateral_type": "residential-property",
+    "valuation": 759000.0,
+    "valuation_date": "2025-11-08"
+  },
+  {
+    "collateral_id": "col-1023-1",
+    "facility_id": "fac-1023-1",
+    "collateral_type": "vehicle",
+    "valuation": 227000.0,
+    "valuation_date": "2026-02-13"
+  },
+  {
+    "collateral_id": "col-1024-0",
+    "facility_id": "fac-1024-0",
+    "collateral_type": "deposit",
+    "valuation": 590000.0,
+    "valuation_date": "2025-10-13"
+  },
+  {
+    "collateral_id": "col-1024-1",
+    "facility_id": "fac-1024-1",
+    "collateral_type": "vehicle",
+    "valuation": 373000.0,
+    "valuation_date": "2026-01-04"
+  }
+]

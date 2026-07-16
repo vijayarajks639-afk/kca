@@ -1,0 +1,326 @@
+[
+  {
+    "facility_id": "fac-88231",
+    "customer_id": "cust-88231",
+    "product": "uk-mortgage",
+    "amount": 226200.0,
+    "currency": "GBP",
+    "originated_at": "2026-03-02",
+    "status": "declined"
+  },
+  {
+    "facility_id": "fac-1001-0",
+    "customer_id": "cust-1001",
+    "product": "uk-mortgage",
+    "amount": 316500.0,
+    "currency": "USD",
+    "originated_at": "2025-07-13",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1002-0",
+    "customer_id": "cust-1002",
+    "product": "auto-loan",
+    "amount": 177997.5,
+    "currency": "GBP",
+    "originated_at": "2025-11-09",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1003-0",
+    "customer_id": "cust-1003",
+    "product": "uk-mortgage",
+    "amount": 148665.0,
+    "currency": "GBP",
+    "originated_at": "2025-09-19",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1003-1",
+    "customer_id": "cust-1003",
+    "product": "revolving-credit",
+    "amount": 298192.5,
+    "currency": "GBP",
+    "originated_at": "2025-06-25",
+    "status": "declined"
+  },
+  {
+    "facility_id": "fac-1004-0",
+    "customer_id": "cust-1004",
+    "product": "term-loan",
+    "amount": 362102.0,
+    "currency": "GBP",
+    "originated_at": "2026-01-02",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1004-1",
+    "customer_id": "cust-1004",
+    "product": "uk-mortgage",
+    "amount": 322140.0,
+    "currency": "GBP",
+    "originated_at": "2025-06-30",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1005-0",
+    "customer_id": "cust-1005",
+    "product": "uk-mortgage",
+    "amount": 186862.5,
+    "currency": "USD",
+    "originated_at": "2025-09-09",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1006-0",
+    "customer_id": "cust-1006",
+    "product": "revolving-credit",
+    "amount": 382557.5,
+    "currency": "USD",
+    "originated_at": "2026-01-24",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1006-1",
+    "customer_id": "cust-1006",
+    "product": "revolving-credit",
+    "amount": 77775.0,
+    "currency": "USD",
+    "originated_at": "2025-08-21",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1007-0",
+    "customer_id": "cust-1007",
+    "product": "term-loan",
+    "amount": 330616.0,
+    "currency": "USD",
+    "originated_at": "2026-01-31",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1007-1",
+    "customer_id": "cust-1007",
+    "product": "auto-loan",
+    "amount": 340560.0,
+    "currency": "USD",
+    "originated_at": "2025-12-23",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1008-0",
+    "customer_id": "cust-1008",
+    "product": "uk-mortgage",
+    "amount": 161287.5,
+    "currency": "GBP",
+    "originated_at": "2025-11-21",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1009-0",
+    "customer_id": "cust-1009",
+    "product": "revolving-credit",
+    "amount": 316710.0,
+    "currency": "USD",
+    "originated_at": "2025-11-23",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1010-0",
+    "customer_id": "cust-1010",
+    "product": "term-loan",
+    "amount": 359310.0,
+    "currency": "GBP",
+    "originated_at": "2025-12-11",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1011-0",
+    "customer_id": "cust-1011",
+    "product": "revolving-credit",
+    "amount": 217867.5,
+    "currency": "USD",
+    "originated_at": "2025-11-01",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1012-0",
+    "customer_id": "cust-1012",
+    "product": "term-loan",
+    "amount": 378615.0,
+    "currency": "USD",
+    "originated_at": "2025-12-26",
+    "status": "declined"
+  },
+  {
+    "facility_id": "fac-1013-0",
+    "customer_id": "cust-1013",
+    "product": "term-loan",
+    "amount": 399645.0,
+    "currency": "USD",
+    "originated_at": "2025-07-28",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1013-1",
+    "customer_id": "cust-1013",
+    "product": "auto-loan",
+    "amount": 448717.5,
+    "currency": "USD",
+    "originated_at": "2025-10-03",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1014-0",
+    "customer_id": "cust-1014",
+    "product": "uk-mortgage",
+    "amount": 106312.5,
+    "currency": "GBP",
+    "originated_at": "2025-11-16",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1015-0",
+    "customer_id": "cust-1015",
+    "product": "auto-loan",
+    "amount": 246540.0,
+    "currency": "USD",
+    "originated_at": "2025-12-07",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1015-1",
+    "customer_id": "cust-1015",
+    "product": "auto-loan",
+    "amount": 180895.0,
+    "currency": "USD",
+    "originated_at": "2026-01-07",
+    "status": "pending"
+  },
+  {
+    "facility_id": "fac-1016-0",
+    "customer_id": "cust-1016",
+    "product": "term-loan",
+    "amount": 304965.0,
+    "currency": "GBP",
+    "originated_at": "2025-07-05",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1017-0",
+    "customer_id": "cust-1017",
+    "product": "auto-loan",
+    "amount": 230287.5,
+    "currency": "USD",
+    "originated_at": "2025-09-27",
+    "status": "declined"
+  },
+  {
+    "facility_id": "fac-1017-1",
+    "customer_id": "cust-1017",
+    "product": "uk-mortgage",
+    "amount": 539362.5,
+    "currency": "USD",
+    "originated_at": "2025-06-14",
+    "status": "declined"
+  },
+  {
+    "facility_id": "fac-1018-0",
+    "customer_id": "cust-1018",
+    "product": "auto-loan",
+    "amount": 51675.0,
+    "currency": "USD",
+    "originated_at": "2026-02-04",
+    "status": "pending"
+  },
+  {
+    "facility_id": "fac-1018-1",
+    "customer_id": "cust-1018",
+    "product": "auto-loan",
+    "amount": 313800.0,
+    "currency": "USD",
+    "originated_at": "2025-09-03",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1019-0",
+    "customer_id": "cust-1019",
+    "product": "auto-loan",
+    "amount": 147960.0,
+    "currency": "USD",
+    "originated_at": "2025-12-18",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1020-0",
+    "customer_id": "cust-1020",
+    "product": "term-loan",
+    "amount": 160875.0,
+    "currency": "GBP",
+    "originated_at": "2025-11-27",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1021-0",
+    "customer_id": "cust-1021",
+    "product": "revolving-credit",
+    "amount": 127627.5,
+    "currency": "USD",
+    "originated_at": "2026-02-13",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1021-1",
+    "customer_id": "cust-1021",
+    "product": "auto-loan",
+    "amount": 132720.0,
+    "currency": "USD",
+    "originated_at": "2025-09-25",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1022-0",
+    "customer_id": "cust-1022",
+    "product": "revolving-credit",
+    "amount": 161700.0,
+    "currency": "USD",
+    "originated_at": "2025-11-08",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1023-0",
+    "customer_id": "cust-1023",
+    "product": "revolving-credit",
+    "amount": 404167.5,
+    "currency": "USD",
+    "originated_at": "2025-11-08",
+    "status": "active"
+  },
+  {
+    "facility_id": "fac-1023-1",
+    "customer_id": "cust-1023",
+    "product": "term-loan",
+    "amount": 85579.0,
+    "currency": "USD",
+    "originated_at": "2026-02-13",
+    "status": "pending"
+  },
+  {
+    "facility_id": "fac-1024-0",
+    "customer_id": "cust-1024",
+    "product": "uk-mortgage",
+    "amount": 256650.0,
+    "currency": "USD",
+    "originated_at": "2025-10-13",
+    "status": "pending"
+  },
+  {
+    "facility_id": "fac-1024-1",
+    "customer_id": "cust-1024",
+    "product": "term-loan",
+    "amount": 113951.5,
+    "currency": "USD",
+    "originated_at": "2026-01-04",
+    "status": "active"
+  }
+]

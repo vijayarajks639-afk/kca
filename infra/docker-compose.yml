@@ -16,6 +16,17 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: 'true'
     volumes:
       - ./keycloak/realm-kca.json:/opt/keycloak/data/import/realm-kca.json:ro
     ports: ['8080:8080']
+    healthcheck:
+      # health endpoint lives on the management port (9000); the image ships no
+      # curl/wget, so probe it with bash's /dev/tcp
+      test:
+        - CMD-SHELL
+        - "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"UP\"' <&3"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
