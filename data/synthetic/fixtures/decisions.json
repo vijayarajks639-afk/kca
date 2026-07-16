@@ -1,0 +1,579 @@
+[
+  {
+    "decision_id": "dec-88231",
+    "application_id": "app-88231",
+    "customer_id": "cust-88231",
+    "facility_id": "fac-88231",
+    "decided_at": "2026-03-14",
+    "policy_version": "v2",
+    "outcome": "decline",
+    "score": 612,
+    "ltv": 0.87,
+    "max_ltv": 0.8,
+    "haircut_applied": 0.35,
+    "reasons": [
+      "LTV 87% exceeds policy v2 maximum 80% after 35% collateral haircut",
+      "Credit score 612 above referral floor 600; decline is policy-driven"
+    ]
+  },
+  {
+    "decision_id": "dec-1001-0",
+    "application_id": "app-1001-0",
+    "customer_id": "cust-1001",
+    "facility_id": "fac-1001-0",
+    "decided_at": "2025-08-05",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 744,
+    "ltv": 0.5,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1002-0",
+    "application_id": "app-1002-0",
+    "customer_id": "cust-1002",
+    "facility_id": "fac-1002-0",
+    "decided_at": "2025-11-21",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 734,
+    "ltv": 0.81,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1003-0",
+    "application_id": "app-1003-0",
+    "customer_id": "cust-1003",
+    "facility_id": "fac-1003-0",
+    "decided_at": "2025-09-26",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 641,
+    "ltv": 0.53,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1003-1",
+    "application_id": "app-1003-1",
+    "customer_id": "cust-1003",
+    "facility_id": "fac-1003-1",
+    "decided_at": "2025-07-25",
+    "policy_version": "v1",
+    "outcome": "decline",
+    "score": 709,
+    "ltv": 0.87,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "LTV 87% exceeds policy v1 maximum 85%"
+    ]
+  },
+  {
+    "decision_id": "dec-1004-0",
+    "application_id": "app-1004-0",
+    "customer_id": "cust-1004",
+    "facility_id": "fac-1004-0",
+    "decided_at": "2026-01-29",
+    "policy_version": "v2",
+    "outcome": "approve",
+    "score": 647,
+    "ltv": 0.76,
+    "max_ltv": 0.8,
+    "haircut_applied": 0.35,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1004-1",
+    "application_id": "app-1004-1",
+    "customer_id": "cust-1004",
+    "facility_id": "fac-1004-1",
+    "decided_at": "2025-07-12",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 629,
+    "ltv": 0.56,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1005-0",
+    "application_id": "app-1005-0",
+    "customer_id": "cust-1005",
+    "facility_id": "fac-1005-0",
+    "decided_at": "2025-10-03",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 623,
+    "ltv": 0.55,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1006-0",
+    "application_id": "app-1006-0",
+    "customer_id": "cust-1006",
+    "facility_id": "fac-1006-0",
+    "decided_at": "2026-02-22",
+    "policy_version": "v2",
+    "outcome": "approve",
+    "score": 611,
+    "ltv": 0.79,
+    "max_ltv": 0.8,
+    "haircut_applied": 0.35,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1006-1",
+    "application_id": "app-1006-1",
+    "customer_id": "cust-1006",
+    "facility_id": "fac-1006-1",
+    "decided_at": "2025-08-28",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 657,
+    "ltv": 0.85,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1007-0",
+    "application_id": "app-1007-0",
+    "customer_id": "cust-1007",
+    "facility_id": "fac-1007-0",
+    "decided_at": "2026-02-12",
+    "policy_version": "v2",
+    "outcome": "approve",
+    "score": 622,
+    "ltv": 0.68,
+    "max_ltv": 0.8,
+    "haircut_applied": 0.35,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1007-1",
+    "application_id": "app-1007-1",
+    "customer_id": "cust-1007",
+    "facility_id": "fac-1007-1",
+    "decided_at": "2026-01-08",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 704,
+    "ltv": 0.66,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1008-0",
+    "application_id": "app-1008-0",
+    "customer_id": "cust-1008",
+    "facility_id": "fac-1008-0",
+    "decided_at": "2025-12-08",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 663,
+    "ltv": 0.85,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1009-0",
+    "application_id": "app-1009-0",
+    "customer_id": "cust-1009",
+    "facility_id": "fac-1009-0",
+    "decided_at": "2025-12-22",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 692,
+    "ltv": 0.51,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1010-0",
+    "application_id": "app-1010-0",
+    "customer_id": "cust-1010",
+    "facility_id": "fac-1010-0",
+    "decided_at": "2026-01-01",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 683,
+    "ltv": 0.58,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1011-0",
+    "application_id": "app-1011-0",
+    "customer_id": "cust-1011",
+    "facility_id": "fac-1011-0",
+    "decided_at": "2025-12-01",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 583,
+    "ltv": 0.69,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1012-0",
+    "application_id": "app-1012-0",
+    "customer_id": "cust-1012",
+    "facility_id": "fac-1012-0",
+    "decided_at": "2026-01-04",
+    "policy_version": "v1",
+    "outcome": "decline",
+    "score": 691,
+    "ltv": 0.86,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "LTV 86% exceeds policy v1 maximum 85%"
+    ]
+  },
+  {
+    "decision_id": "dec-1013-0",
+    "application_id": "app-1013-0",
+    "customer_id": "cust-1013",
+    "facility_id": "fac-1013-0",
+    "decided_at": "2025-08-24",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 731,
+    "ltv": 0.83,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1013-1",
+    "application_id": "app-1013-1",
+    "customer_id": "cust-1013",
+    "facility_id": "fac-1013-1",
+    "decided_at": "2025-10-11",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 667,
+    "ltv": 0.77,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1014-0",
+    "application_id": "app-1014-0",
+    "customer_id": "cust-1014",
+    "facility_id": "fac-1014-0",
+    "decided_at": "2025-11-28",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 736,
+    "ltv": 0.45,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1015-0",
+    "application_id": "app-1015-0",
+    "customer_id": "cust-1015",
+    "facility_id": "fac-1015-0",
+    "decided_at": "2025-12-19",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 588,
+    "ltv": 0.56,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1015-1",
+    "application_id": "app-1015-1",
+    "customer_id": "cust-1015",
+    "facility_id": "fac-1015-1",
+    "decided_at": "2026-01-23",
+    "policy_version": "v2",
+    "outcome": "refer",
+    "score": 579,
+    "ltv": 0.55,
+    "max_ltv": 0.8,
+    "haircut_applied": 0.35,
+    "reasons": [
+      "score 579 below referral floor 600"
+    ]
+  },
+  {
+    "decision_id": "dec-1016-0",
+    "application_id": "app-1016-0",
+    "customer_id": "cust-1016",
+    "facility_id": "fac-1016-0",
+    "decided_at": "2025-07-16",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 582,
+    "ltv": 0.81,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1017-0",
+    "application_id": "app-1017-0",
+    "customer_id": "cust-1017",
+    "facility_id": "fac-1017-0",
+    "decided_at": "2025-10-27",
+    "policy_version": "v1",
+    "outcome": "decline",
+    "score": 574,
+    "ltv": 0.89,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "LTV 89% exceeds policy v1 maximum 85%"
+    ]
+  },
+  {
+    "decision_id": "dec-1017-1",
+    "application_id": "app-1017-1",
+    "customer_id": "cust-1017",
+    "facility_id": "fac-1017-1",
+    "decided_at": "2025-07-13",
+    "policy_version": "v1",
+    "outcome": "decline",
+    "score": 558,
+    "ltv": 0.95,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "LTV 95% exceeds policy v1 maximum 85%"
+    ]
+  },
+  {
+    "decision_id": "dec-1018-0",
+    "application_id": "app-1018-0",
+    "customer_id": "cust-1018",
+    "facility_id": "fac-1018-0",
+    "decided_at": "2026-02-17",
+    "policy_version": "v2",
+    "outcome": "refer",
+    "score": 555,
+    "ltv": 0.53,
+    "max_ltv": 0.8,
+    "haircut_applied": 0.35,
+    "reasons": [
+      "score 555 below referral floor 600"
+    ]
+  },
+  {
+    "decision_id": "dec-1018-1",
+    "application_id": "app-1018-1",
+    "customer_id": "cust-1018",
+    "facility_id": "fac-1018-1",
+    "decided_at": "2025-09-12",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 742,
+    "ltv": 0.8,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1019-0",
+    "application_id": "app-1019-0",
+    "customer_id": "cust-1019",
+    "facility_id": "fac-1019-0",
+    "decided_at": "2026-01-08",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 704,
+    "ltv": 0.48,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1020-0",
+    "application_id": "app-1020-0",
+    "customer_id": "cust-1020",
+    "facility_id": "fac-1020-0",
+    "decided_at": "2025-12-20",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 700,
+    "ltv": 0.65,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1021-0",
+    "application_id": "app-1021-0",
+    "customer_id": "cust-1021",
+    "facility_id": "fac-1021-0",
+    "decided_at": "2026-02-25",
+    "policy_version": "v2",
+    "outcome": "approve",
+    "score": 738,
+    "ltv": 0.55,
+    "max_ltv": 0.8,
+    "haircut_applied": 0.35,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1021-1",
+    "application_id": "app-1021-1",
+    "customer_id": "cust-1021",
+    "facility_id": "fac-1021-1",
+    "decided_at": "2025-10-10",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 631,
+    "ltv": 0.79,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1022-0",
+    "application_id": "app-1022-0",
+    "customer_id": "cust-1022",
+    "facility_id": "fac-1022-0",
+    "decided_at": "2025-11-15",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 588,
+    "ltv": 0.7,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1023-0",
+    "application_id": "app-1023-0",
+    "customer_id": "cust-1023",
+    "facility_id": "fac-1023-0",
+    "decided_at": "2025-12-04",
+    "policy_version": "v1",
+    "outcome": "approve",
+    "score": 725,
+    "ltv": 0.71,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "within policy limits"
+    ]
+  },
+  {
+    "decision_id": "dec-1023-1",
+    "application_id": "app-1023-1",
+    "customer_id": "cust-1023",
+    "facility_id": "fac-1023-1",
+    "decided_at": "2026-02-26",
+    "policy_version": "v2",
+    "outcome": "refer",
+    "score": 582,
+    "ltv": 0.58,
+    "max_ltv": 0.8,
+    "haircut_applied": 0.35,
+    "reasons": [
+      "score 582 below referral floor 600"
+    ]
+  },
+  {
+    "decision_id": "dec-1024-0",
+    "application_id": "app-1024-0",
+    "customer_id": "cust-1024",
+    "facility_id": "fac-1024-0",
+    "decided_at": "2025-11-07",
+    "policy_version": "v1",
+    "outcome": "refer",
+    "score": 568,
+    "ltv": 0.58,
+    "max_ltv": 0.85,
+    "haircut_applied": 0.25,
+    "reasons": [
+      "score 568 below referral floor 580"
+    ]
+  },
+  {
+    "decision_id": "dec-1024-1",
+    "application_id": "app-1024-1",
+    "customer_id": "cust-1024",
+    "facility_id": "fac-1024-1",
+    "decided_at": "2026-01-29",
+    "policy_version": "v2",
+    "outcome": "approve",
+    "score": 640,
+    "ltv": 0.47,
+    "max_ltv": 0.8,
+    "haircut_applied": 0.35,
+    "reasons": [
+      "within policy limits"
+    ]
+  }
+]

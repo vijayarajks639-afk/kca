@@ -1,0 +1,65 @@
+[
+  {
+    "incident_id": "inc-0001",
+    "occurred_at": "2026-02-03",
+    "category": "system-outage",
+    "severity": "high",
+    "description": "Collateral valuation feed unavailable for 6 hours.",
+    "jurisdiction": "GB",
+    "loss_amount": 0.0
+  },
+  {
+    "incident_id": "inc-0002",
+    "occurred_at": "2026-02-19",
+    "category": "data-quality",
+    "severity": "medium",
+    "description": "Stale valuations used in 14 affordability checks.",
+    "jurisdiction": "GB",
+    "loss_amount": 12500.0
+  },
+  {
+    "incident_id": "inc-0003",
+    "occurred_at": "2026-03-09",
+    "category": "process-failure",
+    "severity": "low",
+    "description": "Manual referral queue breached 48h SLA.",
+    "jurisdiction": "US",
+    "loss_amount": 0.0
+  },
+  {
+    "incident_id": "inc-100",
+    "occurred_at": "2026-02-12",
+    "category": "data-quality",
+    "severity": "high",
+    "description": "Synthetic incident 100 (process-failure).",
+    "jurisdiction": "GB",
+    "loss_amount": 19250.0
+  },
+  {
+    "incident_id": "inc-101",
+    "occurred_at": "2025-09-15",
+    "category": "process-failure",
+    "severity": "medium",
+    "description": "Synthetic incident 101 (system-outage).",
+    "jurisdiction": "US",
+    "loss_amount": 32500.0
+  },
+  {
+    "incident_id": "inc-102",
+    "occurred_at": "2025-07-22",
+    "category": "external-fraud",
+    "severity": "medium",
+    "description": "Synthetic incident 102 (process-failure).",
+    "jurisdiction": "US",
+    "loss_amount": 53750.0
+  },
+  {
+    "incident_id": "inc-103",
+    "occurred_at": "2025-11-05",
+    "category": "process-failure",
+    "severity": "medium",
+    "description": "Synthetic incident 103 (data-quality).",
+    "jurisdiction": "DE",
+    "loss_amount": 191750.0
+  }
+]
