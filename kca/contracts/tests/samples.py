@@ -11,6 +11,7 @@ from kca.contracts import (
     Abstention,
     AbstentionReasonCode,
     AutonomyMode,
+    AuthzDecision,
     CallerIdentity,
     DIPCapability,
     DIPContract,
@@ -44,6 +45,15 @@ SAMPLES: dict[type, object] = {
         detail="No decision record found for application 88231 as of 2026-03-14.",
     ),
     CallerIdentity: CALLER,
+    AuthzDecision: AuthzDecision(
+        caller_id="u-4711",
+        role="credit-officer",
+        purpose="credit-decision-review",
+        jurisdiction="GB",
+        policy_version="v1",
+        allowed=True,
+        decided_at=_VALID,
+    ),
     SourceVersion: SourceVersion(source_id="policy/credit/uk-mortgage", version="2026.02"),
     KnowledgeSourceRef: KnowledgeSourceRef(
         source_id="policy/credit/uk-mortgage",

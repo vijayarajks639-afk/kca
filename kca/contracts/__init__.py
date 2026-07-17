@@ -3,6 +3,7 @@
 Shape only, no behavior. Version bumps to SCHEMA_VERSION follow semver.
 """
 
+from .authz import AuthzDecision
 from .base import SCHEMA_VERSION, ContractModel
 from .dip_contract import DIPCapability, DIPContract, KnowledgeSourceRef
 from .ledger import (
@@ -27,6 +28,7 @@ from .retrieval import (
 
 ALL_CONTRACT_MODELS: tuple[type[ContractModel], ...] = (
     Abstention,
+    AuthzDecision,
     CallerIdentity,
     DIPCapability,
     DIPContract,
@@ -48,6 +50,7 @@ __all__ = [
     "AbstentionReasonCode",
     "AutonomyMode",
     "LayerBoundary",
+    "AuthzDecision",
     "CallerIdentity",
     "DIPCapability",
     "DIPContract",

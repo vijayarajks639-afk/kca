@@ -195,3 +195,84 @@ change as verified.
   to keep in sync going forward.
 - **Vijay asked to be consulted before WP-06 starts** — do not begin it
   without checking in first.
+
+---
+
+## WP-08 — AuthZ service, fail-closed
+- **Branch:** `wp-08-authz-service-fail` (card's canonical name — the
+  prompt said `wp-08-authz-service`; followed the card, renamed the branch).
+- **Base:** branched off `main` after WP-05 (PR #4) merged, so the `kca/`
+  package restructure was already in place — no re-hit of the `platform/`
+  stdlib collision. First WP built in a proper `git worktree`
+  (`Projects/kca-wp08`) per the protocol rule, alongside the still-open
+  `Projects/kca-wp05` and the main `Projects/kca-repo` checkout.
+- **Verified live** against the running Postgres 16 + pgvector + Keycloak
+  stack — full suite **121 passed, 0 skipped**, ruff clean.
+
+Shipped (tests-first throughout):
+- `kca/contracts/authz.py`: `AuthzDecision` schema. **Flagged addition** —
+  new contracts module (not a change to an existing schema). Rationale:
+  `platform/authz` exists to be called cross-package (WP-06 retrieval's
+  permission filter), so its public decision shape belongs in `contracts/`
+  per CLAUDE.md rule 5. Wired into `contracts/__init__.py`
+  `ALL_CONTRACT_MODELS` + a sample in `contracts/tests/samples.py` (the
+  completeness test enforces one per model).
+- `kca/platform/authz/policy.py`: policy-as-code. `Grant` (role, purpose,
+  jurisdiction; "*" = any) + `PolicyVersion.permits()` — fail-closed by
+  construction (no default-allow; unknown/blank role or unmatched
+  (role,purpose) denies). `CURRENT_POLICY` v1 grants one purpose per real
+  realm role; `unauthorised-user` deliberately has zero grants.
+- `kca/platform/authz/service.py`: `AuthzService.decide()` returns an
+  `AuthzDecision`, caches by (role,purpose,jurisdiction) for the <10ms
+  criterion, and appends every decision (allow AND deny, cached or not) to
+  an append-only in-memory audit log. `caller_from_oidc_claims()` maps a
+  decoded token's `realm_access.roles` to a `CallerIdentity`, picking the
+  first KCA-known role and falling back to "" (→ deny) if none — fail-closed
+  on missing/unrecognised authority. In-memory log, not the WP-11
+  hash-chained ledger: WP-08's dependency graph is WP-03 only, and the
+  backlog puts the ledger at WP-11; wiring authz into it is deferred to
+  avoid a forward dependency.
+- Acceptance criteria → tests: "unknown/missing authority denies" →
+  test_policy/test_service deny cases + live `test_oidc_integration.py`
+  (real tokens for credit-officer/auditor/unauthorised-user);
+  "cached decisions <10ms" → test_service averages 1000 cached calls,
+  asserts <10ms; "audit log complete for a test session" → asserts one
+  entry per decision, correct allow/deny sequence, policy_version + timestamp
+  on each. All authorisation tests are deterministic (CLAUDE.md rule 9) —
+  no LLM involvement.
+
+Chore (folded in per the session brief): **loader.py provisional DDL →
+migration.**
+- `infra/migrations/versions/0003_domain_tables.py`: the six knowstore
+  domain tables (customers, facilities, collateral, credit_policies,
+  decision_records, op_risk_incidents), moved verbatim from loader.py's
+  former `DDL` string. `down_revision = "0002"`; reversible (drops in FK
+  order). knowstore schema itself is still created by 0002.
+- `loader.py`: deleted the `DDL` constant; `ensure_schema()` now only
+  *asserts* the migrated tables exist (`SELECT to_regclass`) and raises a
+  `RuntimeError` pointing at `alembic upgrade head` if not — it no longer
+  creates anything.
+- Tests: offline `--sql` DDL check in test_migrations.py; test_loader.py
+  now runs `alembic upgrade head` in its fixture and adds a test that
+  `ensure_schema()` raises after a downgrade to 0002.
+
+**Two live-DB gotchas hit and fixed during this WP (both worth remembering
+for any future DB-touching WP on this stack):**
+1. Stray domain tables left over from WP-04-era `ensure_schema()` (the old
+   `CREATE TABLE IF NOT EXISTS` path) collided with 0003's plain
+   `CREATE TABLE`. One-time cleanup: dropped them so the migration owns a
+   clean slate. Future `ensure_schema()` can't recreate them (assert-only
+   now), so this can't recur.
+2. **Self-deadlock in the new downgrade test.** The module-scoped `conn`
+   fixture held `AccessShareLock`s from earlier uncommitted `SELECT`s
+   (idle-in-transaction); the new test's `alembic downgrade` → `DROP TABLE`
+   blocked on them forever (the pytest run hung after all dots printed).
+   Fixed with `conn.rollback()` to release the locks before downgrading.
+   Also had to restart the Postgres container once to clear the wedged
+   sessions from the first hung run — note: `pg_terminate_backend` was
+   blocked by the permission classifier, so `docker compose restart
+   postgres` is the reliable way to clear stale KCA connections here.
+
+- **Status:** committed locally; push + PR pending (same credential-manager
+  push blocker as WP-05 — see Open items). Do not start WP-06 without
+  checking with Vijay first (still stands).

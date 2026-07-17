@@ -68,6 +68,24 @@ def test_offline_upgrade_sql_creates_bitemporal_corpus_items() -> None:
     assert "EXCLUDE" in ddl.upper() or "EXCLUDE USING" in ddl
 
 
+def test_offline_upgrade_sql_creates_domain_tables() -> None:
+    """WP-08 chore: the knowstore domain tables (formerly loader.py's
+    provisional DDL) must be migration-owned (no DB needed — checked in
+    the emitted DDL)."""
+    buf = io.StringIO()
+    alembic_command.upgrade(_make_config(output_buffer=buf), "head", sql=True)
+    ddl = buf.getvalue()
+    for table in (
+        "knowstore.customers",
+        "knowstore.facilities",
+        "knowstore.collateral",
+        "knowstore.credit_policies",
+        "knowstore.decision_records",
+        "knowstore.op_risk_incidents",
+    ):
+        assert table in ddl, f"{table} missing from migration DDL"
+
+
 needs_postgres = pytest.mark.skipif(
     not _postgres_available(), reason="Postgres not reachable — run `make up` first"
 )
