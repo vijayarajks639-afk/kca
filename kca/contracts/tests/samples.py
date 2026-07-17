@@ -7,7 +7,7 @@ without a sample here fails the completeness test.
 from datetime import UTC, date, datetime
 from uuid import UUID
 
-from contracts import (
+from kca.contracts import (
     Abstention,
     AbstentionReasonCode,
     AutonomyMode,

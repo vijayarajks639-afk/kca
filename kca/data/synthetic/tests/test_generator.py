@@ -2,7 +2,7 @@
 
 from datetime import date
 
-from data.synthetic.generator import DEFAULT_SEED, FIXTURES_DIR, generate, load_fixtures_dir
+from kca.data.synthetic.generator import DEFAULT_SEED, FIXTURES_DIR, generate, load_fixtures_dir
 
 
 def test_deterministic_same_seed():

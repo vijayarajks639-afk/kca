@@ -5,8 +5,8 @@ import json
 import pytest
 from pydantic import BaseModel, ValidationError
 
-import contracts
-from contracts import (
+import kca.contracts as contracts
+from kca.contracts import (
     ALL_CONTRACT_MODELS,
     SCHEMA_VERSION,
     AbstentionReasonCode,
@@ -16,7 +16,7 @@ from contracts import (
     LedgerEvent,
     RetrievalRequest,
 )
-from contracts.export_schemas import export_json_schemas
+from kca.contracts.export_schemas import export_json_schemas
 
 from .samples import SAMPLES
 
