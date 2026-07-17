@@ -1,82 +1,15 @@
 """Load synthetic fixtures into the knowstore Postgres schema.
 
-PROVISIONAL DDL: the knowstore tables are defined here only until the knowstore
-package / WP-03 migrations own them; at that point ensure_schema() should defer
-to the migrated schema and this DDL be deleted. Flagged in the WP-04 PR.
+The domain tables are owned by infra/migrations/versions/0003_domain_tables.py
+(moved there from this file's former provisional DDL in WP-08) —
+ensure_schema() only asserts they exist; run `alembic upgrade head` (or
+`make migrate`) first.
 """
 
 import psycopg
 from psycopg.types.json import Json
 
 from .models import SyntheticDataset
-
-DDL = """
-CREATE SCHEMA IF NOT EXISTS knowstore;
-
-CREATE TABLE IF NOT EXISTS knowstore.customers (
-    customer_id   text PRIMARY KEY,
-    name          text NOT NULL,
-    segment       text NOT NULL,
-    jurisdiction  text NOT NULL,
-    annual_income numeric(14,2) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS knowstore.facilities (
-    facility_id   text PRIMARY KEY,
-    customer_id   text NOT NULL REFERENCES knowstore.customers(customer_id),
-    product       text NOT NULL,
-    amount        numeric(14,2) NOT NULL,
-    currency      text NOT NULL,
-    originated_at date NOT NULL,
-    status        text NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS knowstore.collateral (
-    collateral_id   text PRIMARY KEY,
-    facility_id     text NOT NULL REFERENCES knowstore.facilities(facility_id),
-    collateral_type text NOT NULL,
-    valuation       numeric(14,2) NOT NULL,
-    valuation_date  date NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS knowstore.credit_policies (
-    policy_id            text NOT NULL,
-    version              text NOT NULL,
-    title                text NOT NULL,
-    effective_from       date NOT NULL,
-    effective_to         date,
-    max_ltv              float8 NOT NULL,
-    collateral_haircut   float8 NOT NULL,
-    referral_floor_score int NOT NULL,
-    summary              text NOT NULL,
-    PRIMARY KEY (policy_id, version)
-);
-
-CREATE TABLE IF NOT EXISTS knowstore.decision_records (
-    decision_id     text PRIMARY KEY,
-    application_id  text NOT NULL,
-    customer_id     text NOT NULL REFERENCES knowstore.customers(customer_id),
-    facility_id     text NOT NULL REFERENCES knowstore.facilities(facility_id),
-    decided_at      date NOT NULL,
-    policy_version  text NOT NULL,
-    outcome         text NOT NULL,
-    score           int NOT NULL,
-    ltv             float8 NOT NULL,
-    max_ltv         float8 NOT NULL,
-    haircut_applied float8 NOT NULL,
-    reasons         jsonb NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS knowstore.op_risk_incidents (
-    incident_id  text PRIMARY KEY,
-    occurred_at  date NOT NULL,
-    category     text NOT NULL,
-    severity     text NOT NULL,
-    description  text NOT NULL,
-    jurisdiction text NOT NULL,
-    loss_amount  numeric(14,2) NOT NULL
-);
-"""
 
 _TABLES = [
     "customers",
@@ -89,9 +22,14 @@ _TABLES = [
 
 
 def ensure_schema(conn: psycopg.Connection) -> None:
+    """Assert the migrated domain tables exist. Does not create anything."""
     with conn.cursor() as cur:
-        cur.execute(DDL)
-    conn.commit()
+        cur.execute("SELECT to_regclass('knowstore.customers')")
+        if cur.fetchone()[0] is None:
+            raise RuntimeError(
+                "knowstore domain tables are missing — run `alembic upgrade head` "
+                "(or `make migrate`) before loading synthetic data"
+            )
 
 
 def load_dataset(conn: psycopg.Connection, ds: SyntheticDataset) -> None:
