@@ -273,6 +273,67 @@ for any future DB-touching WP on this stack):**
    blocked by the permission classifier, so `docker compose restart
    postgres` is the reliable way to clear stale KCA connections here.
 
-- **Status:** committed locally; push + PR pending (same credential-manager
-  push blocker as WP-05 — see Open items). Do not start WP-06 without
-  checking with Vijay first (still stands).
+- **Status:** merged to `main` via PR #5 (commit 4a7ab9b). Worktree +
+  branch cleaned up.
+
+---
+
+## WP-07 — Semantic service — shared core + credit extension
+- **Branch:** `wp-07-semantic-service-shared` (card's canonical name).
+- **Base:** off `main` (96d3e26, post-WP-08) in a fresh worktree
+  `Projects/kca-wp07`, per the standing session protocol Vijay set on
+  2026-07-17 (now recorded in memory + followed from here on).
+- **Execution-order note:** WP-07 taken before WP-06 per Vijay's explicit
+  order (`…08✓ 07 06…`), which overrides the generic "lowest-numbered"
+  default; both had deps merged, IDE had WP-07 open.
+- **Verified live** against Postgres 16 + pgvector + Keycloak: full suite
+  **144 passed, 0 skipped**, ruff clean; `alembic upgrade head` → 0003 (head).
+
+Shipped (tests-first throughout) — pure in-memory, no DB (deps = WP-02 only),
+mirrors the WP-08 authz policy-as-code shape:
+- **Contracts (flagged, per the card): new `kca/contracts/semantics.py`** with
+  `ResolutionContext` (department/role/application, all optional) and
+  `TermDefinition` (canonical_term, sense_id, domain, definition, steward,
+  effective_date, unit?, parent_sense_id?). New module, not a change to an
+  existing schema. Rationale: `platform/semantics` is called cross-package
+  (WP-13 credit DIP resolves terms through it), so its request/result shapes
+  belong in `contracts/` per rule 5. Registered in `ALL_CONTRACT_MODELS` +
+  two samples (completeness test enforces one per model).
+- `kca/platform/semantics/glossary.py`: `GLOSSARY` term data +
+  `SENSE_SELECTORS` (context→sense rules) as policy-as-code. "exposure"
+  registered as a shared abstract parent with two extensions —
+  CreditRisk.Exposure (unit EAD) and Finance.Exposure (unit carrying_value);
+  plus a single-sense term (CreditRisk.PD) to exercise the no-ambiguity path.
+  `abstract_sense_ids()` marks any sense that is some other sense's parent so
+  the abstract parent is never returned as a concrete resolution.
+- `kca/platform/semantics/service.py`: `SemanticsService.resolve(term,
+  context) -> TermDefinition | Abstention`. Single concrete sense → resolves
+  regardless of context; multiple → context must select exactly one, else
+  `Abstention(AMBIGUOUS_TERM)`; unknown term → `Abstention(AMBIGUOUS_TERM)`
+  too (no UNKNOWN_TERM reason code exists and adding one is out of scope —
+  detail string distinguishes "not registered" from "context did not
+  disambiguate"). Term input normalised (lowercase, trim, spaces→_).
+- Acceptance criteria → tests: "resolution works by context" →
+  resolves-by-department/role/application; "ambiguous context returns
+  AMBIGUOUS_TERM, never a guess" → missing-context, conflicting-context, and
+  abstract-parent-never-returned tests; "every term has a named steward and
+  effective date" → glossary iteration test + resolved-definition test. All
+  deterministic, no LLM.
+
+- **Status:** implemented + verified live + README box ticked; committed
+  locally. **Push + PR pending SSH auth** (see the auth note below).
+
+### Push-auth change this session (SSH) — and a leaked-PAT incident
+Vijay opted to fix the recurring push-auth blocker via SSH. Done my side:
+generated `~/.ssh/id_ed25519` (ed25519, no passphrase), added github.com to
+known_hosts, switched `origin` from HTTPS to `git@github.com:...`. **Blocked
+on Vijay adding the public key** to the `vijayarajks639-afk` GitHub account
+(https://github.com/settings/keys) — until then `ssh -T git@github.com`
+returns `Permission denied (publickey)`. Local key fingerprint:
+`SHA256:O4KYACVuef3mU1UM6XeHy8rorWZng3BsswITibRIW8I`.
+
+**Security incident:** after I explicitly said not to, Vijay pasted a GitHub
+PAT (`ghp_…`) into the chat. It is therefore captured in the transcript and
+must be treated as leaked. I did **not** use it and told him to revoke it
+immediately (https://github.com/settings/tokens) and stick with SSH. Do not
+use that token; if it still appears anywhere, it should be revoked/rotated.

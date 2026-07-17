@@ -25,6 +25,7 @@ from .retrieval import (
     RetrievalResponse,
     RetrievedItem,
 )
+from .semantics import ResolutionContext, TermDefinition
 
 ALL_CONTRACT_MODELS: tuple[type[ContractModel], ...] = (
     Abstention,
@@ -35,10 +36,12 @@ ALL_CONTRACT_MODELS: tuple[type[ContractModel], ...] = (
     KnowledgeSourceRef,
     LedgerEvent,
     ModelRoute,
+    ResolutionContext,
     RetrievalRequest,
     RetrievalResponse,
     RetrievedItem,
     SourceVersion,
+    TermDefinition,
     ValidationResult,
 )
 
@@ -58,9 +61,11 @@ __all__ = [
     "LedgerEvent",
     "LedgerEventType",
     "ModelRoute",
+    "ResolutionContext",
     "RetrievalRequest",
     "RetrievalResponse",
     "RetrievedItem",
     "SourceVersion",
+    "TermDefinition",
     "ValidationResult",
 ]
