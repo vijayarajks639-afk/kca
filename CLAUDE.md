@@ -30,23 +30,40 @@ Prototype of the federated enterprise AI platform from the white paper
 
 ## Repo layout
 
-- contracts/          Pydantic schemas: DIP contract, ledger events, retrieval envelope, reason codes
-- platform/           gateway · router · semantics · retrieval · knowstore · graph(stub) · tools ·
-                      discovery · orchestrator · authz · ledger
-- dips/credit-risk/   Domain Intelligence Product #1 (six asset classes)
-- dips/op-risk/       DIP #2 — Sprint 5 portability proof
-- services/rules-engine/  deterministic re-derivation
-- apps/review-ui/     human review: accept / amend / reject / escalate
-- evals/              harness · golden sets · judge · abstention traps
-- data/synthetic/     generator + fixtures (incl. the 14-March decline scenario)
-- infra/              docker-compose, migrations, CI helpers
-- docs/               architecture doc, backlog, ADRs
+All importable code lives under a single top-level package, `kca/` — never create a new
+top-level importable directory (see "Why a single kca/ package" below for why this rule exists).
+
+- kca/contracts/          Pydantic schemas: DIP contract, ledger events, retrieval envelope, reason codes
+- kca/platform/           gateway · router · semantics · retrieval · knowstore · graph(stub) · tools ·
+                          discovery · orchestrator · authz · ledger
+- kca/dips/credit-risk/   Domain Intelligence Product #1 (six asset classes)
+- kca/dips/op-risk/       DIP #2 — Sprint 5 portability proof
+- kca/services/rules-engine/  deterministic re-derivation
+- kca/evals/              harness · golden sets · judge · abstention traps
+- kca/data/synthetic/     generator + fixtures (incl. the 14-March decline scenario)
+- apps/review-ui/     human review: accept / amend / reject / escalate (not part of the kca package)
+- infra/              docker-compose, migrations, CI helpers (not part of the kca package)
+- docs/               architecture doc, backlog, ADRs (not part of the kca package)
+
+### Why a single kca/ package
+
+WP-01's original scaffold used bare top-level directories (`contracts/`, `platform/`, `data/`, …).
+`platform/` collides with Python's stdlib `platform` module: the moment it became a real package
+(an `__init__.py` was added, needed for WP-05's first real code under it), it shadowed the stdlib
+module process-wide and broke pytest/alembic/sqlalchemy, which call `platform.system()` internally.
+Fixed by nesting everything importable under `kca/` instead. Don't reintroduce a bare top-level
+package directory for the same reason — always add it under `kca/`.
 
 ## Working protocol
 
 One work package (WP) = one branch (`wp-07-semantics`) = one session = one PR.
 The WP card from docs/backlog is the session brief; its acceptance criteria are the PR checklist.
 A human reviews every merge.
+
+**Parallel sessions must use separate `git worktree` checkouts — never share one working tree.**
+Running multiple WP sessions against the same checkout causes branch-switch collisions (a commit
+meant for one WP branch landing on whatever branch another concurrent session had checked out).
+Use `git worktree add ../kca-<wp-id> <branch>` per concurrent WP instead.
 
 ## Stack
 

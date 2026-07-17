@@ -55,6 +55,19 @@ def test_offline_upgrade_sql_enables_pgvector() -> None:
     assert "CREATE EXTENSION IF NOT EXISTS vector" in ddl
 
 
+def test_offline_upgrade_sql_creates_bitemporal_corpus_items() -> None:
+    """WP-05: corpus_items must carry valid_range/record_range and reject overlaps
+    via a gist exclusion constraint (no DB needed — checked in the emitted DDL)."""
+    buf = io.StringIO()
+    alembic_command.upgrade(_make_config(output_buffer=buf), "head", sql=True)
+    ddl = buf.getvalue()
+    assert "CREATE EXTENSION IF NOT EXISTS btree_gist" in ddl
+    assert "knowstore.corpus_items" in ddl
+    assert "valid_range" in ddl and "daterange" in ddl
+    assert "record_range" in ddl and "tstzrange" in ddl
+    assert "EXCLUDE" in ddl.upper() or "EXCLUDE USING" in ddl
+
+
 needs_postgres = pytest.mark.skipif(
     not _postgres_available(), reason="Postgres not reachable — run `make up` first"
 )

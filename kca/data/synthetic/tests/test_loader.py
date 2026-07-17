@@ -6,8 +6,8 @@ import pytest
 
 psycopg = pytest.importorskip("psycopg")
 
-from data.synthetic.generator import DEFAULT_SEED, generate  # noqa: E402
-from data.synthetic.loader import ensure_schema, load_dataset  # noqa: E402
+from kca.data.synthetic.generator import DEFAULT_SEED, generate  # noqa: E402
+from kca.data.synthetic.loader import ensure_schema, load_dataset  # noqa: E402
 
 DSN = os.environ.get("KCA_DATABASE_URL", "postgresql://kca:kca@localhost:5432/kca")
 
