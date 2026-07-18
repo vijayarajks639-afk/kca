@@ -134,6 +134,8 @@ SAMPLES: dict[type, object] = {
         source_version="2026.02",
         content="Affordability threshold is 4.5x gross income.",
         score=0.87,
+        valid_from=date(2026, 2, 1),
+        valid_to=None,
     ),
     RetrievalResponse: RetrievalResponse(
         request_id=UUID("0195f7a2-1111-7000-8000-000000000002"),
@@ -144,6 +146,8 @@ SAMPLES: dict[type, object] = {
                 source_version="2026.02",
                 content="Affordability threshold is 4.5x gross income.",
                 score=0.87,
+                valid_from=date(2026, 2, 1),
+                valid_to=None,
             )
         ],
         abstention=None,
