@@ -404,3 +404,61 @@ Acceptance criteria → tests (all deterministic, live DB):
   merge confirmation before WP-09 (next in order). README boxes for merged
   WP-05/07/08 still unticked (pre-date the tick-on-done protocol) — flagged
   for Vijay, not retro-ticked here to keep this PR's diff clean.
+
+---
+
+## WP-09 — Claude gateway
+- **Branch:** `wp-09-claude-gateway` (card's canonical name).
+- **Base:** off `main` (296399c, post-WP-06) in worktree `Projects/kca-wp09`.
+  Dep WP-02 (contracts) merged. First WP in E3 (model & agent plane).
+- **Loaded the `claude-api` skill before writing any SDK code** (per the repo
+  convention for Claude/Anthropic-shaped work) — model IDs, prompt-caching,
+  retries, and usage-field names come from it, not memory.
+- **Verified live** (Postgres 16 + pgvector + Keycloak up): full suite **198
+  passed, 0 skipped**, ruff clean; `alembic upgrade head` → 0004. (The gateway
+  itself is pure/offline — the live stack just confirms nothing else broke.)
+
+Shipped (tests-first), a native Anthropic SDK wrapper under
+`kca/platform/gateway/`:
+- `profiles.py`: `ModelProfile` policy-as-code. `SONNET_REASONING`
+  (`claude-sonnet-5`, L3) + `HAIKU_ROUTING` (`claude-haiku-4-5`, L4), matching
+  the stack's "Sonnet reasoning, Haiku routing". Exact model-ID strings from
+  the claude-api skill's model table — the project explicitly chose Sonnet+Haiku
+  over the skill's Opus default (a sanctioned override). `max_output_tokens`
+  is the per-call token budget; both kept under ~16K so no streaming needed.
+- `client.py`: `ClaudeGateway`. The SDK client is injected behind an `LLMClient`
+  Protocol — **the one place the Anthropic SDK lives (rule 6, provider SDK in
+  an adapter)**. Retries are the SDK's own via `with_options(max_retries=…)`,
+  not a hand-rolled loop. `anthropic_client()` factory (lazy import) is the
+  production wiring; tests never touch it. Enforces rule 1: rejects any
+  profile whose boundary isn't L3/L4.
+- `errors.py`: `GatewayError` + `UnknownProfileError`, `InvalidBoundaryError`,
+  `BudgetExceededError`, `OutputTruncatedError`.
+- **Flagged contract additions (new module `kca/contracts/gateway.py`):**
+  `ToolSpec`, `ToolCall`, `TokenUsage`, `UsageMetrics`, `GatewayResponse` —
+  the model-plane envelope crosses into the router (WP-10) and orchestrator
+  (WP-12), so it belongs in contracts/ per rule 5. Registered in
+  `ALL_CONTRACT_MODELS` + 5 samples.
+
+Acceptance criteria → tests (all offline, fake client):
+- fully mockable, no live API key in CI → `test_runs_with_no_api_key_in_environment`
+  (unsets `ANTHROPIC_API_KEY`) + every test on a fake client; CI needs no key.
+- budget breach raises, never truncates silently → pre-flight
+  `test_requested_max_tokens_over_profile_budget_raises` + post-call
+  `test_truncated_output_raises_never_returns_partial` (stop_reason==max_tokens).
+- usage metrics emitted per call → `test_usage_metrics_emitted_to_sink_per_call`
+  + `test_usage_still_emitted_when_output_truncated` (emitted even on the
+  raising path — the call spent tokens).
+Plus structured tool-use envelope (specs forwarded, tool_use parsed to
+`ToolCall`), prompt caching (system block gets `cache_control`), and retry
+config assertions.
+
+- **Deferred (noted, not built):** wiring the gateway's `UsageMetrics` into the
+  hash-chained inference ledger is WP-11 (not a dep here) — the gateway emits
+  to an injected sink so WP-11/WP-12 can connect it without a forward
+  dependency. Adaptive thinking / effort are left to per-profile
+  `extra_create_params` rather than hard-coded, since they're model-specific
+  and can't be verified without a live key.
+
+- **Status:** implemented, verified live, README ticked, committed, pushed via
+  SSH. PR to open via web. Awaiting architect review + merge before WP-10.
