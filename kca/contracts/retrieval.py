@@ -32,6 +32,10 @@ class RetrievedItem(ContractModel):
     source_version: str
     content: str
     score: float
+    # effective (valid-time) dates of the retrieved version — WP-06 requires
+    # every hit to carry them. valid_to is None for an open-ended version.
+    valid_from: date
+    valid_to: date | None = None
 
 
 class RetrievalResponse(ContractModel):

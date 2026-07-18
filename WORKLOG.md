@@ -337,3 +337,70 @@ PAT (`ghp_…`) into the chat. It is therefore captured in the transcript and
 must be treated as leaked. I did **not** use it and told him to revoke it
 immediately (https://github.com/settings/tokens) and stick with SSH. Do not
 use that token; if it still appears anywhere, it should be revoked/rotated.
+
+- **UPDATE:** WP-07 SSH auth resolved — Vijay added the public key; `ssh -T`
+  authenticates as `vijayarajks639-afk`. WP-07 pushed via SSH, merged (PR #6,
+  main tip db2f608). Two PATs were pasted into chat during the fumble (one
+  `ghp_`, one fine-grained `github_pat_11…`); I used neither and Vijay
+  revoked both. **Push auth is now SSH for good — no more manual pushes.**
+  PR-open still needs `gh`/API (not set up), so PRs are opened via web for now.
+
+---
+
+## WP-06 — Hybrid retrieval with pre-ranking permission filter
+- **Branch:** `wp-06-hybrid-retrieval-with` (card's canonical name).
+- **Base:** off `main` (db2f608, post-WP-07) in worktree `Projects/kca-wp06`.
+  Deps WP-05 (knowstore) + WP-08 (authz) both merged.
+- **Verified live** (Postgres 16 + pgvector + Keycloak): full suite **160
+  passed, 0 skipped**, ruff clean; `alembic upgrade head` → 0004 (head).
+
+**Architect decision (asked before coding, per protocol step 4):** WP-06 needed
+a search index + doc-level access labels that didn't exist, and the fork was
+where they live. Vijay chose **Option A — extend `knowstore.corpus_items`**
+(over Option B, a retrieval-owned index table). This is a **sanctioned
+exception to rule 5** (retrieval reads/extends another package's table):
+corpus_items is treated as the shared **L1 knowledge plane** — knowstore
+(WP-05) owns the write/versioning API, retrieval (WP-06) owns the read/search
+path over the same table. Documented in the migration, service, PR, and here.
+
+Shipped (tests-first):
+- `infra/migrations/versions/0004_corpus_search_columns.py`: adds to
+  `knowstore.corpus_items` — `tsv` (generated tsvector over content->>'text',
+  GIN-indexed), `embedding vector(64)`, `jurisdiction`, `authorized_purposes
+  text[]`. Reversible. Existing WP-05 inserts unaffected (new cols
+  nullable/defaulted). Exact vector scan (no ANN index) — fast + correct on
+  the fixture corpus; ivfflat/hnsw noted as the scale path.
+- `kca/platform/retrieval/embedding.py`: deterministic local hashing
+  bag-of-tokens embedding (dim 64, L2-normalised), no cloud SDK (rule 6).
+  `to_pgvector()` formats a `::vector` literal (no numpy dep).
+- `kca/platform/retrieval/fusion.py`: reciprocal-rank fusion (rank-based, so
+  it fuses ts_rank vs cosine distance without score normalisation).
+- `kca/platform/retrieval/seed.py`: synthetic policy corpus incl.
+  `UNAUTHORISED_MATCH` (a US-jurisdiction doc that matches the GB
+  credit-officer query strongly — used to prove pre-ranking exclusion) and a
+  superseded/current CP-001 pair for as_of.
+- `kca/platform/retrieval/service.py`: `RetrievalService.retrieve()` —
+  (1) coarse authz gate via WP-08 `AuthzService` (deny → abstain
+  UNAUTHORISED_SOURCE, corpus never touched); (2) doc-level permission filter
+  in the SQL WHERE (jurisdiction + authorised purpose + as_of/current
+  bitemporal slice) — unauthorised docs excluded, not down-ranked;
+  (3) lexical+vector RRF over the survivors, top_k. Composes the authz
+  package's public service (not internals).
+- **Flagged contract change:** extended `RetrievedItem` with `valid_from`
+  (date) + `valid_to` (date|None) so every hit carries effective dates
+  (criterion 3). Updated the two samples.
+
+Acceptance criteria → tests (all deterministic, live DB):
+- unauthorised docs ABSENT from candidate set (not down-ranked) →
+  `test_unauthorised_doc_is_absent_from_candidate_set` (strong-text-match US
+  doc) + `test_unauthorised_caller_fails_closed` (coarse authz gate)
+- P95 < 500ms on fixture corpus → `test_p95_latency_under_500ms` (40 samples)
+- every hit carries version + effective dates →
+  `test_every_hit_carries_version_and_effective_dates`
+- plus `test_as_of_excludes_future_versions` (bitemporal correctness).
+
+- **Status:** implemented, verified live, README ticked, committed, pushed via
+  SSH. PR to be opened via web (no gh/token). Awaiting architect review +
+  merge confirmation before WP-09 (next in order). README boxes for merged
+  WP-05/07/08 still unticked (pre-date the tick-on-done protocol) — flagged
+  for Vijay, not retro-ticked here to keep this PR's diff clean.

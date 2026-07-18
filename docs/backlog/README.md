@@ -18,7 +18,7 @@ Do not start a WP before its dependencies are merged to main.
 
 ### E2 — Knowledge & context layer (Sprint 1)
 - [ ] [WP-05](WP-05.md) Bitemporal knowledge store + as-of API — deps: WP-02, WP-03
-- [ ] [WP-06](WP-06.md) Hybrid retrieval with pre-ranking permission filter — deps: WP-05, WP-08
+- [x] [WP-06](WP-06.md) Hybrid retrieval with pre-ranking permission filter — deps: WP-05, WP-08
 - [x] [WP-07](WP-07.md) Semantic service — shared core + credit extension — deps: WP-02
 - [ ] [WP-08](WP-08.md) AuthZ service, fail-closed — deps: WP-03
 
