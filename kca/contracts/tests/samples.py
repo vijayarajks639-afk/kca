@@ -20,10 +20,12 @@ from kca.contracts import (
     LedgerEvent,
     LedgerEventType,
     ModelRoute,
+    ResolutionContext,
     RetrievalRequest,
     RetrievalResponse,
     RetrievedItem,
     SourceVersion,
+    TermDefinition,
     ValidationResult,
 )
 
@@ -145,5 +147,20 @@ SAMPLES: dict[type, object] = {
             )
         ],
         abstention=None,
+    ),
+    ResolutionContext: ResolutionContext(
+        department="credit-risk",
+        role="credit-officer",
+        application="credit-decline-explanation",
+    ),
+    TermDefinition: TermDefinition(
+        canonical_term="exposure",
+        sense_id="CreditRisk.Exposure",
+        domain="credit-risk",
+        definition="Exposure at Default (EAD): expected gross exposure to a facility at default.",
+        steward="credit-risk-domain-steward",
+        effective_date=_AS_OF,
+        unit="EAD",
+        parent_sense_id="exposure",
     ),
 }
