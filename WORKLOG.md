@@ -518,3 +518,76 @@ Plus capability / cost / latency budget filters.
 
 - **Status:** implemented, verified live, README ticked, committed, pushed via
   SSH. PR to open via web. Awaiting architect review + merge before WP-11.
+
+---
+
+## WP-11 — Inference ledger
+- **Branch:** `wp-11-inference-ledger` (card's canonical name).
+- **Base:** off `main` (967f6c4, post-WP-10) in worktree `Projects/kca-wp11`.
+  Deps WP-02 (contracts — `LedgerEvent` already existed) + WP-05 (bitemporal
+  store, merged; establishes the DB/Alembic pattern this WP reuses).
+- **This is the WP that WP-09's usage sink and WP-10's route recorder were
+  both deferring to** — no code changes needed in either package; they
+  already emit to injected callables, so wiring them up is a follow-on
+  integration step, not part of this WP's scope.
+- **Verified live** (Postgres 16 + pgvector + Keycloak up): full suite **240
+  passed, 0 skipped**, ruff clean; `alembic upgrade head` → 0005.
+
+**Flagged contract extensions (additive, both new optional fields on the
+existing `LedgerEvent` — no field removed or retyped):**
+- `route_decision: RouteDecision | None` — WP-02's original `route: ModelRoute`
+  (model, model_version, boundary) predates WP-10's governed router; kept as
+  a lightweight field for direct model calls, `route_decision` carries the
+  full routed decision (profile, deployment boundary, rules_version) when a
+  call went through `GovernedRouter`.
+- `communication_sent: str | None` — the WP-11 card explicitly lists
+  "communication sent" among what every event must carry (alongside route,
+  retrieved source versions, prompt/output digests, validation results,
+  approver), but no such field existed. Plain descriptive text, matching the
+  `approver` field's style (not a digest — there's no raw content to redact
+  since it's a description, e.g. "credit-decline explanation emailed to
+  applicant 88231", not the message body itself).
+Both wired into `ALL_CONTRACT_MODELS`/`__all__` already covering `LedgerEvent`
+(no registry change needed) and the existing `LedgerEvent` sample extended to
+exercise both new fields. Verified additive: full contracts suite (97 tests)
+passes unchanged.
+
+Shipped (tests-first), under `kca/platform/ledger/`:
+- `infra/migrations/versions/0005_ledger_events.py`: `ledger.chain_head`
+  (singleton row, `CHECK (id)`, holds the current chain tip's `event_hash`)
+  + `ledger.events` (append-only; nested contract objects — route,
+  route_decision, retrieved_sources, validation_results — stored as jsonb
+  since they're recorded data, not queried structure, in this WP). Reversible
+  (`DROP SCHEMA ledger CASCADE` — the schema is owned entirely by this
+  migration, safe to drop whole on downgrade).
+- `hashing.py`: pure, no I/O. `compute_event_hash(prev_hash, event)` — sha256
+  of `prev_hash + canonical_json(event minus prev_hash/event_hash)`, so the
+  same event always hashes identically regardless of serialization order.
+  `verify_chain(events)` walks the list checking both the `prev_hash` pointer
+  chain and each event's own content hash, raising `ChainBrokenError` at the
+  first break — content tamper, pointer tamper, or a deleted/reordered event
+  (a gap breaks the pointer check even without touching either surviving
+  row). Fully offline — tamper detection is testable without a database.
+- `repository.py`: `LedgerRepository` — `append()` computes prev_hash/
+  event_hash itself (ignoring any caller-supplied values: the contract's
+  "carried as data; platform/ledger computes them" note means this
+  repository is the sole computer), serialized via `SELECT ... FOR UPDATE`
+  on the `chain_head` singleton so concurrent appends get one total order.
+  `all_events()` / `events_as_of(date)` — the latter filters
+  `valid_time <= as_of` purely against `ledger.events`, no join elsewhere.
+- `errors.py`: `LedgerError` + `ChainBrokenError`.
+
+Acceptance criteria → tests:
+- tamper test breaks chain verification → pure:
+  `test_tampered_field_breaks_chain_verification`,
+  `test_tampered_prev_hash_pointer_breaks_chain`,
+  `test_deleted_event_from_the_middle_breaks_chain`; live:
+  `test_direct_sql_tamper_breaks_verification_on_refetch` (raw SQL UPDATE
+  bypassing the repository entirely, simulating a DBA/attacker edit).
+- "what did the system know on date X" answers from the ledger alone →
+  `test_events_as_of_answers_purely_from_the_ledger` (seeds events across
+  three dates, confirms only the on/before-cutoff subset returns, ordered by
+  valid_time) + `test_events_as_of_excludes_events_with_no_recorded_knowledge_yet`.
+
+- **Status:** implemented, verified live, README ticked, committed, pushed via
+  SSH. PR to open via web. Awaiting architect review + merge before WP-12.
