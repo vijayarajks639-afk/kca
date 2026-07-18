@@ -15,6 +15,7 @@ from kca.contracts import (
     CallerIdentity,
     DIPCapability,
     DIPContract,
+    GatewayResponse,
     KnowledgeSourceRef,
     LayerBoundary,
     LedgerEvent,
@@ -26,6 +27,10 @@ from kca.contracts import (
     RetrievedItem,
     SourceVersion,
     TermDefinition,
+    TokenUsage,
+    ToolCall,
+    ToolSpec,
+    UsageMetrics,
     ValidationResult,
 )
 
@@ -166,5 +171,33 @@ SAMPLES: dict[type, object] = {
         effective_date=_AS_OF,
         unit="EAD",
         parent_sense_id="exposure",
+    ),
+    ToolSpec: ToolSpec(
+        name="rederive_score",
+        description="Re-derive the credit score deterministically via the rules engine.",
+        input_schema={
+            "type": "object",
+            "properties": {"application_id": {"type": "string"}},
+            "required": ["application_id"],
+        },
+    ),
+    ToolCall: ToolCall(id="toolu_01", name="rederive_score", input={"application_id": "88231"}),
+    TokenUsage: TokenUsage(
+        input_tokens=1200, output_tokens=340, cache_read_input_tokens=1024,
+        cache_creation_input_tokens=0,
+    ),
+    UsageMetrics: UsageMetrics(
+        model="claude-sonnet-5",
+        boundary=LayerBoundary.L3_REASONING,
+        stop_reason="end_turn",
+        usage=TokenUsage(input_tokens=1200, output_tokens=340),
+    ),
+    GatewayResponse: GatewayResponse(
+        model="claude-sonnet-5",
+        boundary=LayerBoundary.L3_REASONING,
+        stop_reason="end_turn",
+        text="The decline was driven by LTV 87% exceeding the 80% cap.",
+        tool_calls=[],
+        usage=TokenUsage(input_tokens=1200, output_tokens=340),
     ),
 }

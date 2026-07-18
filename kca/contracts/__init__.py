@@ -6,6 +6,13 @@ Shape only, no behavior. Version bumps to SCHEMA_VERSION follow semver.
 from .authz import AuthzDecision
 from .base import SCHEMA_VERSION, ContractModel
 from .dip_contract import DIPCapability, DIPContract, KnowledgeSourceRef
+from .gateway import (
+    GatewayResponse,
+    TokenUsage,
+    ToolCall,
+    ToolSpec,
+    UsageMetrics,
+)
 from .ledger import (
     LedgerEvent,
     LedgerEventType,
@@ -33,6 +40,7 @@ ALL_CONTRACT_MODELS: tuple[type[ContractModel], ...] = (
     CallerIdentity,
     DIPCapability,
     DIPContract,
+    GatewayResponse,
     KnowledgeSourceRef,
     LedgerEvent,
     ModelRoute,
@@ -42,6 +50,10 @@ ALL_CONTRACT_MODELS: tuple[type[ContractModel], ...] = (
     RetrievedItem,
     SourceVersion,
     TermDefinition,
+    TokenUsage,
+    ToolCall,
+    ToolSpec,
+    UsageMetrics,
     ValidationResult,
 )
 
@@ -57,6 +69,7 @@ __all__ = [
     "CallerIdentity",
     "DIPCapability",
     "DIPContract",
+    "GatewayResponse",
     "KnowledgeSourceRef",
     "LedgerEvent",
     "LedgerEventType",
@@ -67,5 +80,9 @@ __all__ = [
     "RetrievedItem",
     "SourceVersion",
     "TermDefinition",
+    "TokenUsage",
+    "ToolCall",
+    "ToolSpec",
+    "UsageMetrics",
     "ValidationResult",
 ]
