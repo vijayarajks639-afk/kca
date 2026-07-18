@@ -24,7 +24,7 @@ Do not start a WP before its dependencies are merged to main.
 
 ### E3 — Model & agent plane (Sprint 2)
 - [x] [WP-09](WP-09.md) Claude gateway — deps: WP-02
-- [ ] [WP-10](WP-10.md) Governed router + route recording — deps: WP-09
+- [x] [WP-10](WP-10.md) Governed router + route recording — deps: WP-09
 - [ ] [WP-11](WP-11.md) Inference ledger — deps: WP-02, WP-05
 - [ ] [WP-12](WP-12.md) Orchestrator skeleton (LangGraph behind interface) — deps: WP-09, WP-11
 

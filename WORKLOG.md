@@ -462,3 +462,59 @@ config assertions.
 
 - **Status:** implemented, verified live, README ticked, committed, pushed via
   SSH. PR to open via web. Awaiting architect review + merge before WP-10.
+
+---
+
+## WP-10 — Governed router + route recording
+- **Branch:** `wp-10-governed-router-route` (card's canonical name).
+- **Base:** off `main` (9621118, post-WP-09) in worktree `Projects/kca-wp10`.
+  Dep WP-09 (gateway) merged.
+- **Verified live** (Postgres 16 + pgvector + Keycloak up): full suite **223
+  passed, 0 skipped**, ruff clean; `alembic upgrade head` → 0004. (Router is
+  pure/offline; the live stack just confirms nothing else broke.)
+
+Shipped (tests-first), under `kca/platform/router/`:
+- `policy.py`: `RoutingPolicy` versioned config (policy-as-code, like authz /
+  semantics / gateway profiles). `RouteCandidate`s reference the WP-09 gateway
+  profiles (SONNET_REASONING / HAIKU_ROUTING) so model IDs + layer boundaries
+  don't drift, each tagged with a `DeploymentBoundary` + capabilities + cost +
+  latency. `permitted` map is the governance guard: CONFIDENTIAL/RESTRICTED
+  exclude EXTERNAL (RESTRICTED = ON_PREM only). Includes a local ON_PREM
+  candidate as the only boundary permitted for RESTRICTED, and a same-model
+  EXTERNAL candidate carrying `web_search` so the guard has something to
+  exclude.
+- `router.py`: `GovernedRouter.route(request) -> RouteDecision`. The
+  confidentiality guard runs as a pre-selection filter — candidates outside
+  the sensitivity's permitted deployment boundaries are excluded BEFORE
+  selection, so confidential work can never route out-of-boundary. Fails
+  closed (`NoEligibleRouteError`) if nothing survives capability + boundary +
+  cost/latency filters. Deterministic selection (cheapest → fastest →
+  profile) makes a route replayable from request + rules_version. Emits every
+  decision to an injected recorder — the seam the WP-11 ledger connects to.
+- `errors.py`: `RouterError` + `NoEligibleRouteError`.
+
+**Flagged contract additions (new module `kca/contracts/routing.py`):**
+`DataSensitivity`, `DeploymentBoundary` (enums), `RouteRequest`,
+`RouteDecision`. `DeploymentBoundary` (where inference runs) is deliberately
+distinct from the five-layer `LayerBoundary`. RouteDecision is recorded +
+replayed and consumed by the orchestrator (WP-12), so it belongs in
+contracts/ per rule 5. Registered `RouteRequest`/`RouteDecision` in
+ALL_CONTRACT_MODELS + samples; enums exported in `__all__`.
+
+Acceptance criteria → tests (deterministic, no LLM):
+- confidential task class can never route out-of-boundary →
+  `test_confidential_task_never_routes_external`,
+  `test_confidential_and_restricted_stay_in_permitted_boundary`, and
+  `test_confidential_capability_only_available_external_fails_closed`
+  (fail-closed when the only capable model is external).
+- every call has a recorded, replayable route → `test_every_call_is_recorded`,
+  `test_recorded_route_carries_the_full_decision_path`,
+  `test_route_is_replayable_deterministic`.
+Plus capability / cost / latency budget filters.
+
+- **Deferred (not a dep here):** route recording currently targets an injected
+  recorder; wiring it into the WP-11 hash-chained ledger lands with WP-11
+  (avoids a forward dependency — same pattern as WP-09's usage sink).
+
+- **Status:** implemented, verified live, README ticked, committed, pushed via
+  SSH. PR to open via web. Awaiting architect review + merge before WP-11.

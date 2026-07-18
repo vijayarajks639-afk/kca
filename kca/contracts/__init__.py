@@ -32,6 +32,12 @@ from .retrieval import (
     RetrievalResponse,
     RetrievedItem,
 )
+from .routing import (
+    DataSensitivity,
+    DeploymentBoundary,
+    RouteDecision,
+    RouteRequest,
+)
 from .semantics import ResolutionContext, TermDefinition
 
 ALL_CONTRACT_MODELS: tuple[type[ContractModel], ...] = (
@@ -48,6 +54,8 @@ ALL_CONTRACT_MODELS: tuple[type[ContractModel], ...] = (
     RetrievalRequest,
     RetrievalResponse,
     RetrievedItem,
+    RouteDecision,
+    RouteRequest,
     SourceVersion,
     TermDefinition,
     TokenUsage,
@@ -65,6 +73,8 @@ __all__ = [
     "AbstentionReasonCode",
     "AutonomyMode",
     "LayerBoundary",
+    "DataSensitivity",
+    "DeploymentBoundary",
     "AuthzDecision",
     "CallerIdentity",
     "DIPCapability",
@@ -78,6 +88,8 @@ __all__ = [
     "RetrievalRequest",
     "RetrievalResponse",
     "RetrievedItem",
+    "RouteDecision",
+    "RouteRequest",
     "SourceVersion",
     "TermDefinition",
     "TokenUsage",
