@@ -26,7 +26,7 @@ Do not start a WP before its dependencies are merged to main.
 - [x] [WP-09](WP-09.md) Claude gateway — deps: WP-02
 - [x] [WP-10](WP-10.md) Governed router + route recording — deps: WP-09
 - [x] [WP-11](WP-11.md) Inference ledger — deps: WP-02, WP-05
-- [ ] [WP-12](WP-12.md) Orchestrator skeleton (LangGraph behind interface) — deps: WP-09, WP-11
+- [x] [WP-12](WP-12.md) Orchestrator skeleton (LangGraph behind interface) — deps: WP-09, WP-11
 
 ### E4 — Credit Risk DIP + the worked journey (Sprint 3)
 - [ ] [WP-13](WP-13.md) Credit Risk DIP package — deps: WP-04, WP-07

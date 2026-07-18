@@ -591,3 +591,86 @@ Acceptance criteria → tests:
 
 - **Status:** implemented, verified live, README ticked, committed, pushed via
   SSH. PR to open via web. Awaiting architect review + merge before WP-12.
+
+---
+
+## WP-12 — Orchestrator skeleton (LangGraph behind interface)
+- **Branch:** `wp-12-orchestrator-skeleton-langgraph` (card's canonical name).
+- **Base:** off `main` (7c15b50, post-WP-11) in worktree `Projects/kca-wp12`.
+  Deps WP-09 (gateway) + WP-11 (ledger) merged.
+- **No new contracts** — `AutonomyMode`, `Abstention`/`AbstentionReasonCode`,
+  and `LedgerEvent` (already extended by WP-11) covered everything needed.
+  First WP with zero contract changes.
+- **Verified live**: full suite **267 passed, 0 skipped** — Postgres 16 +
+  pgvector + Keycloak up, `alembic upgrade head` → 0005 (unchanged, no
+  migration needed), **and langgraph 1.2.9 pip-installed this session**
+  specifically to verify the LangGraph adapter for real rather than ship it
+  as an untested guess against the API (see below) — first time the whole
+  repo suite has hit zero skips. langgraph stays an optional extra
+  (`pyproject: orchestrator = ["langgraph>=0.2"]`); CI still installs only
+  `.[dev]`, so its tests correctly `pytest.importorskip("langgraph")` and
+  skip in that environment — installing it here was a one-off verification
+  step, not a change to the required dev environment.
+
+Shipped (tests-first), under `kca/platform/orchestrator/`:
+- `journey.py`: pure domain model, no engine/ledger/DB dependency.
+  `JourneyState` (immutable, accumulates step output), `StepStatus`
+  (CONTINUE/APPROVAL_REQUIRED/ABSTAIN/DONE), `StepOutcome` (validates itself:
+  CONTINUE must name `next_step`, ABSTAIN must carry an `Abstention`),
+  `JourneyStep` (Protocol — a plain callable, no separate `.name`, since the
+  steps dict's own keys are the canonical names), `JourneyDefinition` (what
+  a DIP/agent supplies — the "agent config" the autonomy cap must resist),
+  `JourneyResult`.
+- `engine.py`: `GraphEngine` Protocol — "LangGraph behind interface" per the
+  stack line. `SimpleGraphEngine` is the tested default (pure Python, no
+  dependency): follows `next_step` until a non-CONTINUE status.
+  `LangGraphEngine` wraps the identical steps in a real
+  `langgraph.graph.StateGraph` (lazy import, mirroring
+  `kca/platform/gateway/client.py`'s `anthropic_client()` factory so
+  importing this module never requires the extra) — `add_node` +
+  `add_conditional_edges` (a routing closure reading the last recorded
+  outcome) + `set_entry_point` + `compile().invoke()`. **Verified working
+  against real langgraph 1.2.9 on the first attempt** (both LangGraph tests
+  passed once the package was installed) — not shipped as an unverified
+  guess.
+- `orchestrator.py`: `Orchestrator` — enforces the autonomy cap at
+  construction (rejects EXECUTING; `_PERMITTED_AUTONOMY` = informational/
+  advisory/decision_support only, per CLAUDE.md rule 8's precise wording,
+  chosen over the WP card's looser "capped at advisory/decision-support"
+  scope phrasing) and again per-journey against `requested_autonomy_mode`
+  (the literal "agent config" override the criterion names) — raises rather
+  than silently downgrading, since a silent clamp would mask a real
+  configuration bug. `autonomy_mode` is a read-only property, no setter.
+  Runs a journey via the injected `GraphEngine`, then emits one
+  `LedgerEvent` per step via an injected `Callable[[LedgerEvent], None]`
+  recorder — the same deferred-wiring pattern as WP-09's usage_sink and
+  WP-10's route recorder; wiring it to the real `LedgerRepository.append`
+  is a future integration step (WP-15's first concrete journey), not this
+  skeleton's scope. Event type mapping: ABSTAIN → `ABSTENTION`,
+  APPROVAL_REQUIRED → `HUMAN_REVIEW`, else → `DECISION_PROPOSAL`; the
+  abstention reason code is also recorded into the event's
+  `validation_results[].detail` (defense in depth — the primary,
+  directly-tested carrier is `JourneyResult.abstention` itself).
+  `ApprovalGate`: a convenience step that always pauses for human review —
+  the concrete "approval gates" primitive named in scope.
+- `errors.py`: `OrchestratorError` + `AutonomyCapViolationError`.
+
+Acceptance criteria → tests (all offline except the two langgraph ones):
+- every graph step emits a ledger event →
+  `test_every_step_emits_a_ledger_event` (3-step journey, 3 events) +
+  `test_abstention_step_is_ledgered_as_abstention_event_type` +
+  `test_approval_gate_is_ledgered_as_human_review_event_type`.
+- abstention exits carry reason codes →
+  `test_abstention_exit_carries_reason_code_on_the_result` +
+  `test_abstention_halts_the_journey_before_later_steps` (later steps never
+  run or get ledgered).
+- autonomy cap not overridable by agent config →
+  `test_orchestrator_rejects_executing_autonomy_at_construction` +
+  `test_journey_cannot_smuggle_in_executing_via_requested_autonomy_mode`
+  (the journey/"agent config" override case) +
+  `test_autonomy_mode_has_no_setter` + parametrized acceptance of all three
+  permitted modes.
+
+- **Status:** implemented, verified live (incl. the LangGraph adapter for
+  real), README ticked, committed, pushed via SSH. PR to open via web.
+  Awaiting architect review + merge before WP-13.
