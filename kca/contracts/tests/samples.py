@@ -119,6 +119,19 @@ SAMPLES: dict[type, object] = {
             model_version="20260201",
             boundary=LayerBoundary.L3_REASONING,
         ),
+        route_decision=RouteDecision(
+            request=RouteRequest(
+                task_class="explain_decline",
+                data_sensitivity=DataSensitivity.CONFIDENTIAL,
+                required_capability="reasoning",
+            ),
+            profile="sonnet-reasoning",
+            model="claude-sonnet-5",
+            layer_boundary=LayerBoundary.L3_REASONING,
+            deployment_boundary=DeploymentBoundary.PRIVATE_CLOUD,
+            rules_version="v1",
+            decided_at=_VALID,
+        ),
         retrieved_sources=[
             SourceVersion(source_id="policy/credit/uk-mortgage", version="2026.02")
         ],
@@ -128,6 +141,7 @@ SAMPLES: dict[type, object] = {
             ValidationResult(check="rederivation-match", passed=True, detail=None)
         ],
         approver="reviewer-771",
+        communication_sent="credit-decline explanation emailed to applicant 88231",
         prev_hash="c" * 64,
         event_hash="d" * 64,
     ),

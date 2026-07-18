@@ -86,6 +86,19 @@ def test_offline_upgrade_sql_creates_domain_tables() -> None:
         assert table in ddl, f"{table} missing from migration DDL"
 
 
+def test_offline_upgrade_sql_creates_ledger_events() -> None:
+    """WP-11: ledger.events (append-only, hash-chained) and the chain_head
+    singleton must be migration-owned (no DB needed — checked in the DDL)."""
+    buf = io.StringIO()
+    alembic_command.upgrade(_make_config(output_buffer=buf), "head", sql=True)
+    ddl = buf.getvalue()
+    assert "CREATE SCHEMA IF NOT EXISTS ledger" in ddl
+    assert "ledger.events" in ddl
+    assert "prev_hash" in ddl
+    assert "event_hash" in ddl
+    assert "ledger.chain_head" in ddl
+
+
 needs_postgres = pytest.mark.skipif(
     not _postgres_available(), reason="Postgres not reachable — run `make up` first"
 )
