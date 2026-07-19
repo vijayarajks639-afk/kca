@@ -859,3 +859,104 @@ Acceptance criteria → tests, `kca/services/rules_engine/tests/test_engine.py`:
 - **Status:** implemented, verified live, README ticked, committed, pushed
   via SSH. PR to open via web. Awaiting architect review + merge before
   WP-15.
+
+---
+
+## WP-15 — Eight-step credit-decline journey end-to-end
+- **Branch:** `wp-15-eight-step-credit` (card's canonical name).
+- **Base:** off `main` (`29043b1`, post-WP-14) in worktree `Projects/kca-wp15`.
+  Deps WP-12 (orchestrator) + WP-13 (credit DIP) + WP-14 (rules engine) all
+  merged. **This is the WP every prior deferred-wiring note pointed at:** the
+  orchestrator's `ledger_recorder` is wired to the real
+  `LedgerRepository.append` for the first time — every executed step now
+  lands as a hash-chained row in `ledger.events`.
+- **Scope boundaries honored (checked WP-16/WP-17 briefs before designing):**
+  step 6 (explanation policy filter) and step 7 (named human review) are
+  deliberate minimal seams — a tagged pass-through and an unconditional
+  APPROVAL_REQUIRED pause — because WP-16 (`orchestrator/filters/`) and
+  WP-17 (`apps/review-ui/`) own the real implementations and both depend on
+  this WP. No auto-approve path exists.
+- **LLM call is fake-client only, honestly:** no `ANTHROPIC_API_KEY` exists
+  in this environment (checked env/.env/compose), so the draft step runs the
+  REAL `ClaudeGateway` (budgets, envelope parsing, usage sink) over a canned
+  `LLMClient` fake — the same constraint WP-09's own tests document. A live
+  key would exercise the identical code path.
+- **Verified live**: full suite **355 passed, 0 skipped** — Postgres 16 +
+  pgvector + Keycloak up; `alembic upgrade head` → 0005 (unchanged — the
+  journey composes existing tables); ruff clean.
+- **Subagent note:** attempted to parallelize the knowstore reader to a
+  background agent per Vijay's direction; the agent died on an infra stream
+  timeout before writing anything, so the reader was built in-thread on the
+  critical path instead. Recorded honestly rather than reported as a
+  successful parallel run.
+
+**Flagged contract addition (new module `kca/contracts/reconstruction.py`):**
+`ReconstructedDecision` — the decision record joined to its exact feature
+vector and the policy version in force at `decided_at`. Crosses from
+knowstore (owns the read) to the orchestrator (composes the journey), so it
+belongs in contracts/ per rule 5. Registered + sample (14-March scenario).
+
+**Flagged same-package enhancement (`orchestrator.py`, additive):**
+`Orchestrator._record` now honors optional well-known `outcome.data` keys —
+`route_decision`, `prompt_digest`, `output_digest`, `retrieved_sources` — so
+a step that made a model call is ledgered as a full rule-4 `MODEL_CALL`
+event (route + digests + `inference_time`) and a retrieval step as
+`RETRIEVAL` with its exact source versions. All 27 existing WP-12 tests pass
+unchanged (keys absent → prior behavior).
+
+Shipped:
+- `kca/platform/knowstore/decisions.py`: `DecisionReconstructionRepository`
+  — the read side of the domain tables WP-04's loader writes; single JOIN
+  across decision_records/facilities/collateral/credit_policies; returns the
+  contract or `None` (the abstention decision belongs to the journey, not
+  the repository). Decimal→float casts at the boundary.
+- `kca/platform/orchestrator/journeys/credit_decline.py`:
+  `build_credit_decline_journey(services, application_id, caller)` — the
+  eight steps as closures over injected `CreditDeclineServices` (decisions,
+  retrieval, semantics, router, gateway, rederive — all duck-typed public
+  services, rule 5). Design decisions worth remembering:
+  - **as_of = decided_at everywhere**, never today — the criterion-1
+    discipline lives in one place (the retrieve step's request).
+  - **Route request carries `max_latency_ms=2000`** (matching the canonical
+    explain_decline sample): without it the router's cheapest-first rule
+    would pick the `local-onprem` candidate (cost 0) — a profile the
+    gateway can't execute. With it, deterministic sonnet-reasoning in
+    PRIVATE_CLOUD; confidential never routes EXTERNAL.
+  - **Semantic resolution context = the caller's role only** — not a
+    hardcoded department/application self-tag, which would always
+    disambiguate and make the AMBIGUOUS_TERM trap unfireable through the
+    real glossary. Who-is-asking resolves the term, or the journey abstains.
+  - **Validation is deterministic, two checks:** every `[cite:source|ver]`
+    marker must match a version actually retrieved (citing the May revision
+    for a March decision → VERSION_CONFLICT), and every %/score figure in
+    the draft must be rules-engine/policy-backed (a stray number →
+    REDERIVATION_MISMATCH). No LLM judges anything (rule 9).
+
+Acceptance criteria → tests,
+`kca/platform/orchestrator/tests/test_credit_decline_journey.py` (live DB,
+real services, fake LLM client only):
+- "March decline explained against March policy after the May revision" →
+  `test_march_decline_explained_against_march_policy_after_may_revision`
+  (corpus holds BOTH CP-001 v2-march and v3-may; the RETRIEVAL ledger event
+  proves v2-march was drafted against, never v3-may) +
+  `test_draft_citing_the_may_revision_is_a_version_conflict` (the negative:
+  a draft citing v3-may is caught by validation).
+- "All four abstention traps fire with correct reason codes" →
+  `test_trap_missing_decision_record` (unknown app, stops at step 1),
+  `test_trap_unauthorised_requester` (zero-grant role, stops at the authz
+  gate inside retrieve), `test_trap_rederivation_mismatch` (LTV tampered by
+  direct SQL, rules engine refuses at step 3, restored in finally),
+  `test_trap_ambiguous_term` (an auditor is authorised to retrieve but
+  their context doesn't select a sense of "exposure" — abstains at draft).
+  Each trap asserts reason code AND the exact truncated trace AND the
+  ABSTENTION ledger event.
+- Ledger discipline → `test_every_step_is_ledgered_and_the_chain_verifies`
+  (7 steps = 7 events, `verify_chain` passes, RETRIEVAL/MODEL_CALL/
+  HUMAN_REVIEW types in the right positions) +
+  `test_model_call_event_carries_route_and_digests` (route_decision =
+  sonnet-reasoning/private_cloud/v1 rules + 64-hex prompt/output digests +
+  inference_time) + `test_draft_with_stray_figure_fails_numeric_fidelity`.
+
+- **Status:** implemented, verified live, README ticked, committed, pushed
+  via SSH. PR to open via web. Awaiting architect review + merge before
+  WP-16.

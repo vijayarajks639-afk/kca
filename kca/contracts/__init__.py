@@ -44,6 +44,7 @@ from .reason_codes import (
     AutonomyMode,
     LayerBoundary,
 )
+from .reconstruction import ReconstructedDecision
 from .retrieval import (
     CallerIdentity,
     RetrievalRequest,
@@ -78,6 +79,7 @@ ALL_CONTRACT_MODELS: tuple[type[ContractModel], ...] = (
     LedgerEvent,
     ModelRoute,
     QualitySLO,
+    ReconstructedDecision,
     RederivationResult,
     RederivationSnapshot,
     ResolutionContext,
@@ -126,6 +128,7 @@ __all__ = [
     "LedgerEventType",
     "ModelRoute",
     "QualitySLO",
+    "ReconstructedDecision",
     "RederivationResult",
     "RederivationSnapshot",
     "ResolutionContext",
