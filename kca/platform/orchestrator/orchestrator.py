@@ -98,11 +98,34 @@ class Orchestrator:
         detail = None
         if outcome.status is StepStatus.ABSTAIN and outcome.abstention is not None:
             detail = f"{outcome.abstention.reason_code.value}: {outcome.abstention.detail}"
+
+        # WP-15 (additive): a step may surface its route decision, prompt/
+        # output digests, and retrieved source versions through well-known
+        # outcome.data keys, so its ledger event carries the full rule-4
+        # record. A step that made a model call is ledgered as MODEL_CALL,
+        # a retrieval step as RETRIEVAL; terminal statuses keep their
+        # dedicated event types.
+        route_decision = outcome.data.get("route_decision")
+        retrieved_sources = outcome.data.get("retrieved_sources") or []
+        if outcome.status in _EVENT_TYPE_BY_STATUS:
+            event_type = _EVENT_TYPE_BY_STATUS[outcome.status]
+        elif route_decision is not None:
+            event_type = LedgerEventType.MODEL_CALL
+        elif retrieved_sources:
+            event_type = LedgerEventType.RETRIEVAL
+        else:
+            event_type = LedgerEventType.DECISION_PROPOSAL
+
         event = LedgerEvent(
             event_id=uuid4(),
-            event_type=_EVENT_TYPE_BY_STATUS.get(outcome.status, LedgerEventType.DECISION_PROPOSAL),
+            event_type=event_type,
             valid_time=now,
             record_time=now,
+            inference_time=now if route_decision is not None else None,
+            route_decision=route_decision,
+            retrieved_sources=retrieved_sources,
+            prompt_digest=outcome.data.get("prompt_digest"),
+            output_digest=outcome.data.get("output_digest"),
             validation_results=[
                 ValidationResult(
                     check=f"orchestrator_step:{step_name}",
