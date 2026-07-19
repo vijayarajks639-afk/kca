@@ -779,3 +779,83 @@ Acceptance criteria → tests, `kca/dips/tests/test_credit_risk.py`:
 - **Status:** implemented, verified live, README ticked (WP-13 plus the six
   stale boxes above), committed, pushed via SSH. PR to open via web. Awaiting
   architect review + merge before WP-14.
+
+---
+
+## WP-14 — Deterministic rules re-derivation
+- **Branch:** `wp-14-deterministic-rules-re` (card's canonical name — the
+  branch was first created as `wp-14-deterministic-rules-rederivation` before
+  the card was read; renamed to match once caught, same pattern as prior
+  WP-03/WP-08 branch-name mismatches).
+- **Base:** off `main` (`12f41a1`, post-WP-13) in worktree `Projects/kca-wp14`.
+  Dep WP-04 (synthetic data) merged.
+- **The only decision logic defined anywhere in this repo** lives in
+  `kca/data/synthetic/generator.py`'s bulk-generation loop (not documented
+  elsewhere — no architecture doc is committed, see WP-13's note on this).
+  Re-derived it exactly rather than inventing new logic: LTV = facility
+  amount ÷ (collateral valuation × (1 − haircut)); decline if LTV exceeds the
+  policy's `max_ltv` (strict `>`), else refer if credit score is below the
+  referral floor (strict `<`), else approve. Credit score itself is treated
+  as an external input (the generator draws it from `rng.randint`, with no
+  formula anywhere) — the engine re-derives the *decision*, not the score
+  itself, despite the tool name `rederive_score` (WP-13's `ToolGrant`)
+  suggesting otherwise; there is no scoring model in this codebase to
+  recompute.
+- **Verified live**: full suite **338 passed, 0 skipped** — Postgres 16 +
+  pgvector + Keycloak up, `alembic upgrade head` → 0005 (unchanged, no
+  migration needed — this WP is pure Python, no schema), ruff clean.
+
+**Flagged contract addition (new module `kca/contracts/rules_engine.py`):**
+`RederivationSnapshot` (the immutable input snapshot: facility amount,
+collateral valuation, policy version + parameters, credit score, plus what
+was recorded at the time) and `RederivationResult` (computed vs recorded
+figures, `matched: bool`, and an `abstention: Abstention | None` carrying
+`REDERIVATION_MISMATCH` on disagreement — embedded-abstention style, matching
+`RetrievalResponse.abstention`, chosen over raising an exception since a
+future orchestrator journey step needs to carry a mismatch through as data,
+not unwind the call stack). Rationale for contracts/ (not local to the
+service): CLAUDE.md rule 2 frames rules-engine as something "the LLM may
+orchestrate the call" to — cross-package by design, even though the actual
+wiring is WP-15's scope. Registered in `ALL_CONTRACT_MODELS` + `__all__` +
+one sample each (completeness test enforces this).
+
+Shipped, under `kca/services/rules_engine/` (importable underscore sibling
+of the hyphenated `kca/services/rules-engine/` placeholder in CLAUDE.md's
+repo layout — same naming split WP-13 established for `kca/dips/credit-risk/`
+vs `kca/dips/credit_risk.py`; the hyphenated directory holds no data for
+this WP, so it's left untouched):
+- `engine.py`: `rederive(snapshot) -> RederivationResult`, pure, no I/O, no
+  import of any other package's internals — `kca.data.synthetic`'s row types
+  are explicitly "internal to that package" per its own module docstring, so
+  building a `RederivationSnapshot` from synthetic fixtures is test-only glue
+  (`tests/test_engine.py`), never something this package's production code
+  does.
+- `fixtures/seeded_mismatch.json` + `loader.py`: a committed, deliberately
+  tampered snapshot — reuses the real 14-March scenario's true feature vector
+  (amount 226,200 / valuation 400,000 / policy v2 / score 612, which really
+  does compute to decline at LTV 0.87) but claims a recorded outcome of
+  "approve" at LTV 0.80 (suspiciously exactly at the policy cap) — a
+  plausible tampering/mis-recording pattern, not an arbitrary or vacuous
+  disagreement.
+
+Acceptance criteria → tests, `kca/services/rules_engine/tests/test_engine.py`:
+- "Re-derivation matches recorded outcome on fixtures" →
+  `test_rederivation_matches_every_committed_decision_fixture` (all 36
+  decisions in the committed WP-04 fixtures for seed 42 — every bulk-generated
+  decision, not just the pinned scenario) +
+  `test_rederivation_matches_the_pinned_14_march_scenario` (the paper-§9
+  scenario specifically: LTV 0.87, decline).
+- "Seeded mismatch fixture triggers the investigation path" →
+  `test_seeded_mismatch_fixture_triggers_investigation_path` (loads the
+  committed fixture, asserts `REDERIVATION_MISMATCH`) +
+  `test_score_below_referral_floor_refers_and_a_wrong_recording_mismatches`
+  (a second, independently-constructed refer-vs-approve mismatch, so the
+  check isn't only ever proven against one specific disagreement shape).
+- Plus two boundary tests pinning the exact comparison operators (`>` for
+  LTV, `<` for score) against off-by-one drift: exactly-at-max-LTV and
+  exactly-at-referral-floor must both still approve, matching the generator's
+  strict inequalities.
+
+- **Status:** implemented, verified live, README ticked, committed, pushed
+  via SSH. PR to open via web. Awaiting architect review + merge before
+  WP-15.

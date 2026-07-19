@@ -56,6 +56,7 @@ from .routing import (
     RouteDecision,
     RouteRequest,
 )
+from .rules_engine import RederivationResult, RederivationSnapshot
 from .semantics import ResolutionContext, TermDefinition
 
 ALL_CONTRACT_MODELS: tuple[type[ContractModel], ...] = (
@@ -77,6 +78,8 @@ ALL_CONTRACT_MODELS: tuple[type[ContractModel], ...] = (
     LedgerEvent,
     ModelRoute,
     QualitySLO,
+    RederivationResult,
+    RederivationSnapshot,
     ResolutionContext,
     RetrievalRequest,
     RetrievalResponse,
@@ -123,6 +126,8 @@ __all__ = [
     "LedgerEventType",
     "ModelRoute",
     "QualitySLO",
+    "RederivationResult",
+    "RederivationSnapshot",
     "ResolutionContext",
     "RetrievalRequest",
     "RetrievalResponse",

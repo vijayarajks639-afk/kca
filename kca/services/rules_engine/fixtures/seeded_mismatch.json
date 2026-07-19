@@ -1,0 +1,12 @@
+{
+  "application_id": "app-88231-tampered",
+  "facility_amount": 226200.0,
+  "collateral_valuation": 400000.0,
+  "policy_version": "v2",
+  "max_ltv": 0.8,
+  "collateral_haircut": 0.35,
+  "referral_floor_score": 600,
+  "credit_score": 612,
+  "recorded_outcome": "approve",
+  "recorded_ltv": 0.8
+}
