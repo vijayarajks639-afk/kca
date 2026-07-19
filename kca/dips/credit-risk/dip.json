@@ -1,0 +1,117 @@
+{
+  "dip_id": "dip-credit-risk",
+  "name": "Credit Risk DIP",
+  "domain": "credit-risk",
+  "owner": "credit-risk-platform-team",
+  "contract_version": "1.0.0",
+  "autonomy_mode": "decision_support",
+  "jurisdictions": ["GB", "US"],
+  "capabilities": [
+    {
+      "name": "explain-decline",
+      "description": "Explain a recorded credit decline decision",
+      "boundary": "L3_reasoning"
+    }
+  ],
+  "knowledge_sources": [
+    {
+      "source_id": "credit-policy:CP-001",
+      "description": "Collateral haircut policy for mortgage lending"
+    },
+    {
+      "source_id": "credit-policy:CP-014",
+      "description": "Affordability assessment standard"
+    }
+  ],
+  "effective_from": "2026-01-01",
+  "freshness_slo": {
+    "max_staleness_days": 1,
+    "measured_from": "latest knowledge_sources source_version publish date"
+  },
+  "quality_slo": {
+    "metric": "golden_set_pass_rate",
+    "threshold": 0.95,
+    "measured_by": "kca.evals golden-set runner (WP-18)"
+  },
+  "access_policy": {
+    "policy_version": "v1",
+    "allowed_roles": ["credit-officer", "domain-steward", "auditor"]
+  },
+  "evaluation_gate": {
+    "golden_set_id": "credit-risk-decline-v1",
+    "min_pass_rate": 0.95
+  },
+  "lifecycle": {
+    "status": "active",
+    "effective_to": null,
+    "superseded_by": null
+  },
+  "semantic_extensions": [
+    {
+      "sense_id": "CreditRisk.Exposure",
+      "description": "Exposure at Default (EAD)"
+    },
+    {
+      "sense_id": "CreditRisk.PD",
+      "description": "Probability of default, one-year horizon"
+    }
+  ],
+  "data_contracts": [
+    {
+      "dataset_id": "knowstore.decision_records",
+      "description": "Credit decision records (WP-04 synthetic)",
+      "primary_key": "decision_id",
+      "freshness_slo": {
+        "max_staleness_days": 1,
+        "measured_from": "decided_at"
+      },
+      "quality_checks": [
+        "not_null(decision_id)",
+        "ltv >= 0",
+        "score between 300 and 850"
+      ]
+    },
+    {
+      "dataset_id": "knowstore.credit_policies",
+      "description": "Credit policy versions with effective dates",
+      "primary_key": "policy_version",
+      "freshness_slo": {
+        "max_staleness_days": 90,
+        "measured_from": "effective_from"
+      },
+      "quality_checks": [
+        "no overlapping effective date ranges"
+      ]
+    }
+  ],
+  "tool_grants": [
+    {
+      "tool_name": "rederive_score",
+      "allowed_roles": ["credit-officer", "auditor"],
+      "allowed_purposes": ["credit-decision-review", "audit"]
+    }
+  ],
+  "abstention_rules": [
+    {
+      "reason_code": "MISSING_DECISION_RECORD",
+      "trigger": "No decision record exists for the requested application_id as of the caller's as_of date."
+    },
+    {
+      "reason_code": "VERSION_CONFLICT",
+      "trigger": "More than one credit_policy version claims validity for the decision's decided_at date."
+    },
+    {
+      "reason_code": "REDERIVATION_MISMATCH",
+      "trigger": "The rules engine's re-derived score, LTV, or haircut does not match the figures cited in the decision record."
+    },
+    {
+      "reason_code": "AMBIGUOUS_TERM",
+      "trigger": "A glossary term (e.g. exposure) is requested without enough caller context to resolve a single sense."
+    },
+    {
+      "reason_code": "UNAUTHORISED_SOURCE",
+      "trigger": "The permission filter excludes every candidate source for the caller's role, purpose, and jurisdiction."
+    }
+  ],
+  "agent_instructions_ref": "agent_instructions.md"
+}

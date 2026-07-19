@@ -1,0 +1,30 @@
+{
+  "golden_set_id": "credit-risk-decline-v1",
+  "dip_id": "dip-credit-risk",
+  "cases": [
+    {
+      "case_id": "case-88231-decline-explanation",
+      "scenario": "Explain why application app-88231 (customer cust-88231) was declined.",
+      "expected_reason_codes": [],
+      "expected_summary": "LTV 87% exceeds policy v2 maximum 80% after a 35% collateral haircut; credit score 612 is above the referral floor of 600, so the decline is policy-driven, not score-driven."
+    },
+    {
+      "case_id": "case-unknown-application-abstains",
+      "scenario": "Explain why application app-99999 (unknown) was declined.",
+      "expected_reason_codes": ["MISSING_DECISION_RECORD"],
+      "expected_summary": null
+    },
+    {
+      "case_id": "case-exposure-without-context-abstains",
+      "scenario": "What is the exposure on this facility? (no department/role/application context supplied)",
+      "expected_reason_codes": ["AMBIGUOUS_TERM"],
+      "expected_summary": null
+    },
+    {
+      "case_id": "case-rederivation-mismatch-abstains",
+      "scenario": "Explain application app-88231's decline when the rules engine re-derives a score that disagrees with the decision record's cited score.",
+      "expected_reason_codes": ["REDERIVATION_MISMATCH"],
+      "expected_summary": null
+    }
+  ]
+}

@@ -10,17 +10,27 @@ from uuid import UUID
 from kca.contracts import (
     Abstention,
     AbstentionReasonCode,
+    AbstentionRule,
+    AccessPolicyRef,
     AutonomyMode,
     AuthzDecision,
     CallerIdentity,
+    DataContract,
     DIPCapability,
     DIPContract,
+    DIPLifecycle,
+    DIPLifecycleStatus,
+    EvaluationGate,
+    FreshnessSLO,
     GatewayResponse,
+    GoldenSet,
+    GoldenSetCase,
     KnowledgeSourceRef,
     LayerBoundary,
     LedgerEvent,
     LedgerEventType,
     ModelRoute,
+    QualitySLO,
     ResolutionContext,
     DataSensitivity,
     DeploymentBoundary,
@@ -29,10 +39,12 @@ from kca.contracts import (
     RetrievedItem,
     RouteDecision,
     RouteRequest,
+    SemanticExtensionRef,
     SourceVersion,
     TermDefinition,
     TokenUsage,
     ToolCall,
+    ToolGrant,
     ToolSpec,
     UsageMetrics,
     ValidationResult,
@@ -75,6 +87,61 @@ SAMPLES: dict[type, object] = {
         description="Explain a recorded credit decline decision",
         boundary=LayerBoundary.L3_REASONING,
     ),
+    FreshnessSLO: FreshnessSLO(
+        max_staleness_days=1,
+        measured_from="latest knowledge_sources source_version publish date",
+    ),
+    QualitySLO: QualitySLO(
+        metric="golden_set_pass_rate",
+        threshold=0.95,
+        measured_by="kca.evals golden-set runner (WP-18)",
+    ),
+    AccessPolicyRef: AccessPolicyRef(
+        policy_version="v1",
+        allowed_roles=["credit-officer", "domain-steward", "auditor"],
+    ),
+    EvaluationGate: EvaluationGate(golden_set_id="credit-risk-decline-v1", min_pass_rate=0.95),
+    DIPLifecycle: DIPLifecycle(status=DIPLifecycleStatus.ACTIVE),
+    SemanticExtensionRef: SemanticExtensionRef(
+        sense_id="CreditRisk.Exposure",
+        description="Exposure at Default (EAD)",
+    ),
+    DataContract: DataContract(
+        dataset_id="knowstore.decision_records",
+        description="Credit decision records (WP-04 synthetic)",
+        primary_key="decision_id",
+        freshness_slo=FreshnessSLO(max_staleness_days=1, measured_from="decided_at"),
+        quality_checks=["not_null(decision_id)", "ltv >= 0", "score between 300 and 850"],
+    ),
+    ToolGrant: ToolGrant(
+        tool_name="rederive_score",
+        allowed_roles=["credit-officer", "auditor"],
+        allowed_purposes=["credit-decision-review", "audit"],
+    ),
+    AbstentionRule: AbstentionRule(
+        reason_code=AbstentionReasonCode.MISSING_DECISION_RECORD,
+        trigger="No decision record exists for the requested application_id as of the "
+        "caller's as_of date.",
+    ),
+    GoldenSetCase: GoldenSetCase(
+        case_id="case-88231-decline-explanation",
+        scenario="Explain why application app-88231 (customer cust-88231) was declined.",
+        expected_reason_codes=[],
+        expected_summary="LTV 87% exceeds policy v2 maximum 80% after 35% collateral haircut.",
+    ),
+    GoldenSet: GoldenSet(
+        golden_set_id="credit-risk-decline-v1",
+        dip_id="dip-credit-risk",
+        cases=[
+            GoldenSetCase(
+                case_id="case-88231-decline-explanation",
+                scenario="Explain why application app-88231 (customer cust-88231) was declined.",
+                expected_reason_codes=[],
+                expected_summary="LTV 87% exceeds policy v2 maximum 80% after 35% collateral "
+                "haircut.",
+            )
+        ],
+    ),
     DIPContract: DIPContract(
         dip_id="dip-credit-risk",
         name="Credit Risk DIP",
@@ -97,6 +164,53 @@ SAMPLES: dict[type, object] = {
             )
         ],
         effective_from=_AS_OF,
+        freshness_slo=FreshnessSLO(
+            max_staleness_days=1,
+            measured_from="latest knowledge_sources source_version publish date",
+        ),
+        quality_slo=QualitySLO(
+            metric="golden_set_pass_rate",
+            threshold=0.95,
+            measured_by="kca.evals golden-set runner (WP-18)",
+        ),
+        access_policy=AccessPolicyRef(
+            policy_version="v1",
+            allowed_roles=["credit-officer", "domain-steward", "auditor"],
+        ),
+        evaluation_gate=EvaluationGate(
+            golden_set_id="credit-risk-decline-v1", min_pass_rate=0.95
+        ),
+        lifecycle=DIPLifecycle(status=DIPLifecycleStatus.ACTIVE),
+        semantic_extensions=[
+            SemanticExtensionRef(
+                sense_id="CreditRisk.Exposure",
+                description="Exposure at Default (EAD)",
+            )
+        ],
+        data_contracts=[
+            DataContract(
+                dataset_id="knowstore.decision_records",
+                description="Credit decision records (WP-04 synthetic)",
+                primary_key="decision_id",
+                freshness_slo=FreshnessSLO(max_staleness_days=1, measured_from="decided_at"),
+                quality_checks=["not_null(decision_id)"],
+            )
+        ],
+        tool_grants=[
+            ToolGrant(
+                tool_name="rederive_score",
+                allowed_roles=["credit-officer", "auditor"],
+                allowed_purposes=["credit-decision-review", "audit"],
+            )
+        ],
+        abstention_rules=[
+            AbstentionRule(
+                reason_code=AbstentionReasonCode.MISSING_DECISION_RECORD,
+                trigger="No decision record exists for the requested application_id as of "
+                "the caller's as_of date.",
+            )
+        ],
+        agent_instructions_ref="agent_instructions.md",
     ),
     ModelRoute: ModelRoute(
         model="claude-sonnet-5",

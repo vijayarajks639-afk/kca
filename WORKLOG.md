@@ -674,3 +674,108 @@ Acceptance criteria → tests (all offline except the two langgraph ones):
 - **Status:** implemented, verified live (incl. the LangGraph adapter for
   real), README ticked, committed, pushed via SSH. PR to open via web.
   Awaiting architect review + merge before WP-13.
+
+---
+
+## WP-13 — Credit Risk DIP package
+- **Branch:** `wp-13-credit-risk-dip` (card's canonical name).
+- **Base:** off `main` (`ba9a9d0`, post-WP-12) in worktree `Projects/kca-wp13`.
+  Deps WP-04 (synthetic data) + WP-07 (semantics) merged.
+- **Open chore folded in (per Vijay's standing execution-order instructions):
+  extended `DIPContract` to the full paper §8.2 shape** — owner (already
+  existed), freshness SLO, quality SLO, access policy, evaluation gate,
+  change/retirement. Note: the repo has no committed architecture doc (see
+  below) and the WP-13 card itself only lists four of these six groups in its
+  acceptance line; the fuller six-item list came from Vijay's own chore
+  instruction, which takes precedence.
+- **Repo-hygiene finding, not a real dependency gap:** `docs/backlog/README.md`
+  had WP-01–05 and WP-08 unticked despite being genuinely merged (confirmed
+  via `git log --merges` and the actual commit history — PRs #1/#3/#4/#5 plus
+  two pre-worktree direct-to-main commits for WP-01/WP-03). Likely just
+  missed check-offs from before the tick-on-done habit was consistent (WP-06's
+  entry above flagged the same gap but deliberately left it untouched to keep
+  that PR's diff clean). Since this PR already touches `README.md` for its
+  own WP-13 tick, and the merged status is independently git-verified (not
+  assumed), fixed all six stale boxes here rather than deferring again —
+  flagged here and in the PR description as a correction beyond WP-13's own
+  line, per CLAUDE.md's "flag it in the PR description" allowance.
+- **No architecture doc exists in this repo to check §8.2 against.**
+  `docs/README.md` says the architecture doc "lives in the design workspace
+  for now; export/commit as part of WP-01 review" — that export never
+  happened. Every `§`-reference in the codebase is a citation to an external
+  document, not committed text. Proceeded from the WP-13 card's own wording
+  plus Vijay's chore instruction as the authoritative spec, since that's what
+  is actually committed and reviewable.
+- **Verified live**: full suite **324 passed, 0 skipped** — Postgres 16 +
+  pgvector + Keycloak up, `alembic upgrade head` → 0005 (unchanged, no
+  migration needed — this WP ships config/content, not schema), ruff clean.
+
+**Flagged contract changes** (WP-13's card explicitly anticipates this):
+- **`kca/contracts/dip_contract.py` (existing schema, extended):** added
+  `FreshnessSLO`, `QualitySLO`, `AccessPolicyRef`, `EvaluationGate`,
+  `DIPLifecycleStatus`/`DIPLifecycle` — all five now **required** fields on
+  `DIPContract` (`freshness_slo`, `quality_slo`, `access_policy`,
+  `evaluation_gate`, `lifecycle`). Confirmed via repo-wide grep that
+  `DIPContract(...)` is constructed in exactly one place
+  (`contracts/tests/samples.py`) before making these required, so there was
+  no other call site to break.
+- **`kca/contracts/dip_assets.py` (new module):** the six-asset-class shapes
+  that aren't just a reuse of an existing type — `SemanticExtensionRef`
+  (pointer only; the definition itself stays authored in
+  `platform/semantics/glossary.py`, WP-07), `DataContract`, `ToolGrant`,
+  `AbstentionRule` (restricted to the *existing* `AbstentionReasonCode`
+  vocabulary — no new reason codes minted), `GoldenSetCase`, `GoldenSet`.
+  `FreshnessSLO` physically lives in this module rather than
+  `dip_contract.py` — `DataContract` needs it and `dip_contract.py` already
+  needs to import from `dip_assets.py` for the other four, so defining it in
+  `dip_contract.py` instead created a circular import (caught immediately by
+  the first test run: `ImportError … partially initialized module`, fixed by
+  moving the class rather than adding a workaround). All eleven new/changed
+  types registered in `ALL_CONTRACT_MODELS` + `__all__` + one sample each in
+  `contracts/tests/samples.py` (completeness test enforces this); the
+  existing `DIPContract` sample extended with the five new required fields.
+  Note two asset classes reuse existing types rather than adding new ones:
+  *governed corpus* is `DIPContract.knowledge_sources` (`KnowledgeSourceRef`,
+  unchanged, from WP-02) and *semantic extension* content is WP-07's glossary
+  — this DIP only references sense_ids, it doesn't re-author them.
+
+Shipped, under `kca/dips/`:
+- `kca/dips/credit-risk/{dip.json, golden_set.json, agent_instructions.md}`:
+  the six-asset content package as versioned data — hyphenated directory
+  name (matching CLAUDE.md's repo layout), pure data, never imported as a
+  package (same split as `kca/data/synthetic/fixtures/`, since hyphens
+  aren't valid Python identifiers). Removed the now-redundant `.gitkeep`.
+  `dip.json`'s `knowledge_sources` and `semantic_extensions` reference real,
+  already-seeded values — `credit-policy:CP-001`/`CP-014` from
+  `platform/retrieval/seed.py`'s `SAMPLE_DOCS`, `CreditRisk.Exposure`/
+  `CreditRisk.PD` from `platform/semantics/glossary.py`'s `GLOSSARY` — rather
+  than inventing illustrative-only IDs, so the cross-check tests below assert
+  against genuinely live data, not fixtures duplicated for this WP alone.
+  `abstention_rules` deliberately covers all five existing reason codes.
+- `kca/dips/credit_risk.py`: the importable loader/assembler sibling —
+  `load_dip_contract()`, `load_golden_set()`, `load_agent_instructions()`.
+  Exists because hyphenated directories can't be imported; this is the
+  pattern any future hyphenated DIP package (`kca/dips/op-risk/`, WP-22)
+  would mirror.
+
+Acceptance criteria → tests, `kca/dips/tests/test_credit_risk.py`:
+- "Validates against the DIP contract schema" →
+  `test_dip_contract_validates_against_schema` (loads `dip.json`,
+  `DIPContract.model_validate_json`, Pattern B — same idiom as WP-04's
+  `load_fixtures_dir`).
+- "Published contract (owner, freshness/quality SLOs, access policy, eval
+  gate) renders from the package" →
+  `test_published_contract_renders_owner_and_slos`.
+- Cross-package consistency (not required by the card's literal checklist,
+  but the only way to prove the package's pointers are real rather than
+  fictional): `test_semantic_extensions_reference_real_glossary_senses` +
+  `test_semantic_extensions_are_credit_risk_domain` (against the live
+  `GLOSSARY`), `test_knowledge_sources_reference_real_seed_corpus` (against
+  live `SAMPLE_DOCS`), `test_access_policy_matches_live_authz_policy` +
+  `test_tool_grants_reference_known_roles` (against live `CURRENT_POLICY`/
+  `KNOWN_ROLES`), `test_abstention_rules_cover_the_full_vocabulary`,
+  `test_golden_set_id_matches_evaluation_gate`, `test_agent_instructions_load_and_are_non_empty`.
+
+- **Status:** implemented, verified live, README ticked (WP-13 plus the six
+  stale boxes above), committed, pushed via SSH. PR to open via web. Awaiting
+  architect review + merge before WP-14.

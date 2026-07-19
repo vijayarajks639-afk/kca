@@ -11,16 +11,16 @@ Do not start a WP before its dependencies are merged to main.
 
 
 ### E1 — Foundation (Sprint 0)
-- [ ] [WP-01](WP-01.md) Repo scaffold + CLAUDE.md + CI — deps: none
-- [ ] [WP-02](WP-02.md) Contract package (Pydantic) — deps: WP-01
-- [ ] [WP-03](WP-03.md) Docker Compose: Postgres 16 + pgvector + Keycloak — deps: WP-01
-- [ ] [WP-04](WP-04.md) Synthetic data generator — deps: WP-02
+- [x] [WP-01](WP-01.md) Repo scaffold + CLAUDE.md + CI — deps: none
+- [x] [WP-02](WP-02.md) Contract package (Pydantic) — deps: WP-01
+- [x] [WP-03](WP-03.md) Docker Compose: Postgres 16 + pgvector + Keycloak — deps: WP-01
+- [x] [WP-04](WP-04.md) Synthetic data generator — deps: WP-02
 
 ### E2 — Knowledge & context layer (Sprint 1)
-- [ ] [WP-05](WP-05.md) Bitemporal knowledge store + as-of API — deps: WP-02, WP-03
+- [x] [WP-05](WP-05.md) Bitemporal knowledge store + as-of API — deps: WP-02, WP-03
 - [x] [WP-06](WP-06.md) Hybrid retrieval with pre-ranking permission filter — deps: WP-05, WP-08
 - [x] [WP-07](WP-07.md) Semantic service — shared core + credit extension — deps: WP-02
-- [ ] [WP-08](WP-08.md) AuthZ service, fail-closed — deps: WP-03
+- [x] [WP-08](WP-08.md) AuthZ service, fail-closed — deps: WP-03
 
 ### E3 — Model & agent plane (Sprint 2)
 - [x] [WP-09](WP-09.md) Claude gateway — deps: WP-02
@@ -29,7 +29,7 @@ Do not start a WP before its dependencies are merged to main.
 - [x] [WP-12](WP-12.md) Orchestrator skeleton (LangGraph behind interface) — deps: WP-09, WP-11
 
 ### E4 — Credit Risk DIP + the worked journey (Sprint 3)
-- [ ] [WP-13](WP-13.md) Credit Risk DIP package — deps: WP-04, WP-07
+- [x] [WP-13](WP-13.md) Credit Risk DIP package — deps: WP-04, WP-07
 - [ ] [WP-14](WP-14.md) Deterministic rules re-derivation — deps: WP-04
 - [ ] [WP-15](WP-15.md) Eight-step credit-decline journey end-to-end — deps: WP-12, WP-13, WP-14
 - [ ] [WP-16](WP-16.md) Explanation policy filter — deps: WP-15
