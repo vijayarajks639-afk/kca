@@ -266,6 +266,45 @@ def test_trap_ambiguous_term(conn, seeded):
     assert result.trace == ("reconstruct", "retrieve", "rederive", "draft")
 
 
+# --- WP-16: internal + external versions both in ledger ----------------------
+
+
+def test_internal_and_external_versions_both_in_ledger(conn, seeded):
+    import hashlib
+
+    result, ledger = _run(conn)
+    filter_event = next(
+        e
+        for e in ledger.all_events()
+        if e.validation_results[0].check == "orchestrator_step:filter"
+    )
+    filtered = result.data["filtered"]
+
+    # in = the internal draft, out = the approved external wording — both
+    # digest-pinned in the same hash-chained event.
+    assert filter_event.prompt_digest == hashlib.sha256(
+        filtered.internal_text.encode("utf-8")
+    ).hexdigest()
+    assert filter_event.output_digest == hashlib.sha256(
+        filtered.external_text.encode("utf-8")
+    ).hexdigest()
+    assert filter_event.prompt_digest != filter_event.output_digest
+
+
+def test_both_artifacts_reach_the_reviewer_and_external_is_clean(conn, seeded):
+    result, _ = _run(conn)
+    filtered = result.data["filtered"]
+
+    # retained together for WP-17's review queue
+    assert filtered.internal_text == HAPPY_REPLY
+    assert filtered.external_text
+    # the customer-facing artifact carries no figures or internal detail
+    assert not any(ch.isdigit() for ch in filtered.external_text)
+    for leaked in ("haircut", "referral floor", "v2-march", "cite:"):
+        assert leaked not in filtered.external_text
+    assert filtered.reasons_used == ("ltv_exceeds_policy_max",)
+
+
 # --- validation catches a dishonest draft -----------------------------------
 
 
