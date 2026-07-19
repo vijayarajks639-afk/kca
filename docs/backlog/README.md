@@ -32,7 +32,7 @@ Do not start a WP before its dependencies are merged to main.
 - [x] [WP-13](WP-13.md) Credit Risk DIP package — deps: WP-04, WP-07
 - [x] [WP-14](WP-14.md) Deterministic rules re-derivation — deps: WP-04
 - [x] [WP-15](WP-15.md) Eight-step credit-decline journey end-to-end — deps: WP-12, WP-13, WP-14
-- [ ] [WP-16](WP-16.md) Explanation policy filter — deps: WP-15
+- [x] [WP-16](WP-16.md) Explanation policy filter — deps: WP-15
 - [ ] [WP-17](WP-17.md) Review UI — deps: WP-15
 
 ### E5 — Assurance (Sprint 4)

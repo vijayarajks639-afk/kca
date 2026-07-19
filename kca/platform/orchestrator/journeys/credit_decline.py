@@ -21,10 +21,13 @@ Steps, each failing closed to a reason-coded abstention (CLAUDE.md rule 7):
                        matches the re-derived/recorded numbers (a stray
                        figure → REDERIVATION_MISMATCH — no LLM-computed
                        number slips through)
-  6. filter          — explanation policy filter. WP-16 owns the real
-                       internal→customer-facing mapping; this step is the
-                       named seam it will replace — here it passes the
-                       internal draft through unchanged, tagged as internal.
+  6. filter          — explanation policy filter (WP-16,
+                       orchestrator/filters/): maps the internal
+                       reconstruction to approved customer-facing wording
+                       selected off structured facts (zero LLM-generated
+                       words externally), screens the result fail-closed
+                       against forbidden content, retains both artifacts,
+                       and digest-pins both versions into the ledger.
   7. review          — named human review. WP-17 owns the real review UI;
                        here the journey pauses APPROVAL_REQUIRED (the
                        orchestrator ledgers it as HUMAN_REVIEW) — nothing is
@@ -68,6 +71,7 @@ from kca.contracts import (
     SourceVersion,
     TermDefinition,
 )
+from kca.platform.orchestrator.filters import ExplanationPolicyFilter
 from kca.platform.orchestrator.journey import (
     JourneyDefinition,
     JourneyState,
@@ -90,6 +94,10 @@ class CreditDeclineServices:
     router: object  # GovernedRouter: .route(RouteRequest)
     gateway: object  # ClaudeGateway: .complete(profile, messages, ...)
     rederive: object  # callable: rederive(RederivationSnapshot) -> RederivationResult
+    # WP-16: ExplanationPolicyFilter: .filter(decision, internal_text).
+    # Optional so pre-WP-16 constructions keep working; None -> the default
+    # policy-as-code filter (CURRENT_FILTER_POLICY).
+    explanation_filter: object = None
 
 
 @dataclass(frozen=True)
@@ -326,21 +334,36 @@ def build_credit_decline_journey(
         return StepOutcome(status=StepStatus.CONTINUE, data={}, next_step="filter")
 
     def filter_step(state: JourneyState) -> StepOutcome:
-        # WP-16's seam: internal→customer-facing mapping + prohibited-content
-        # filtering land there. Until then the internal draft passes through,
-        # explicitly tagged — nothing leaves this journey anyway (review
-        # below never auto-approves).
+        # WP-16: the real explanation policy filter. The external artifact is
+        # composed from approved wording selected off the decision's
+        # structured facts — zero LLM-generated words reach it; the internal
+        # draft is retained verbatim beside it. Both versions are
+        # digest-pinned into this step's ledger event (in = internal draft,
+        # out = external wording). A FilterViolationError (mis-authored
+        # approved wording) propagates loudly — config bugs never emit.
+        decision: ReconstructedDecision = state.data["decision"]
         explanation: ExplanationDraft = state.data["draft"]
+        filt = services.explanation_filter or ExplanationPolicyFilter()
+        result = filt.filter(decision, explanation.text)
         return StepOutcome(
             status=StepStatus.CONTINUE,
-            data={"filtered": {"audience": "internal", "text": explanation.text}},
+            data={
+                "filtered": result,
+                "prompt_digest": _digest(result.internal_text),
+                "output_digest": _digest(result.external_text),
+            },
             next_step="review",
         )
 
     def review(state: JourneyState) -> StepOutcome:
         # WP-17's seam: the named-reviewer UI. The journey always pauses here;
         # the orchestrator ledgers this as HUMAN_REVIEW. No auto-approve path.
-        return StepOutcome(status=StepStatus.APPROVAL_REQUIRED)
+        # Both filter artifacts ride on this outcome so the JourneyResult
+        # hands the reviewer's case (internal + external) to WP-17's queue.
+        return StepOutcome(
+            status=StepStatus.APPROVAL_REQUIRED,
+            data={"filtered": state.data["filtered"]},
+        )
 
     return JourneyDefinition(
         name=f"credit-decline-explanation:{application_id}",

@@ -960,3 +960,78 @@ real services, fake LLM client only):
 - **Status:** implemented, verified live, README ticked, committed, pushed
   via SSH. PR to open via web. Awaiting architect review + merge before
   WP-16.
+
+---
+
+## WP-16 — Explanation policy filter
+- **Branch:** `wp-16-explanation-policy-filter` (card's canonical name).
+- **Base:** off `main` (`8725207`, post-WP-15) in worktree `Projects/kca-wp16`.
+  Dep WP-15 (the journey whose step-6 seam this replaces) merged.
+- **Verified live**: full suite **372 passed, 0 skipped** — Postgres 16 +
+  pgvector + Keycloak up; alembic → 0005 (unchanged); ruff clean.
+
+**Core design decision — zero LLM words externally:** the customer-facing
+artifact is composed ONLY from the policy's approved sentences, selected
+deterministically from the decision's structured facts (recorded LTV vs the
+policy max → LTV sentence; score vs referral floor → criteria sentence).
+The LLM's internal draft is never parsed, quoted, or paraphrased into the
+external text — it is retained verbatim as the internal artifact beside it.
+This makes "forbidden content never passes" structural, not probabilistic:
+prohibited content can only enter the external artifact if the approved
+wording itself is mis-authored, and the fail-closed screen catches exactly
+that case (FilterViolationError — a config bug crashes loudly, mirroring
+the autonomy cap's raise-don't-downgrade philosophy; no redact/sanitize
+path exists, and a test pins that).
+
+Shipped, under `kca/platform/orchestrator/filters/` (the card's package):
+- `policy.py`: `FilterPolicy` v1 as policy-as-code (mirroring authz/router/
+  gateway/semantics). Forbidden pattern classes: proprietary_model_logic
+  (referral floor, haircut, policy vN ids, thresholds, rules-engine /
+  re-derivation mechanics, scoring-model references, max-LTV), bureau_detail
+  (raw 3-digit scores, bureau/agency names), prohibited_attribute (age,
+  gender, race, religion, ethnicity, nationality, marital status,
+  disability), plus a belt-and-braces `\d` rule — NO figure of any kind is
+  approved for external wording. Approved sentences are digit-free by
+  construction.
+- `explanation.py`: `ExplanationPolicyFilter.filter(decision,
+  internal_text) -> FilterResult` (both artifacts + policy_version +
+  reasons_used); `.screen(text)` exposed for WP-17's amend path (amended
+  text must re-screen); non-decline outcomes refused (ValueError).
+- Journey seam replaced (`journeys/credit_decline.py`, the seam WP-15
+  explicitly left for this WP — flagged as a same-parent-package change):
+  `CreditDeclineServices` gains optional `explanation_filter` (default →
+  the real policy-as-code filter); step 6 digest-pins BOTH versions into
+  its ledger event (prompt_digest = internal, output_digest = external —
+  same in/out convention as the model-call event); the review step now
+  carries the FilterResult on its outcome so JourneyResult.data hands the
+  reviewer's case (internal + external together) to WP-17's queue.
+
+Acceptance criteria → tests:
+- "Internal + external versions both in ledger" →
+  `test_internal_and_external_versions_both_in_ledger` (journey test, live
+  DB: the filter step's hash-chained event carries sha256(internal) and
+  sha256(external), and they differ) +
+  `test_both_artifacts_reach_the_reviewer_and_external_is_clean`.
+- "Forbidden-content test corpus never passes the filter" →
+  `test_forbidden_corpus_is_always_flagged` (8-item parametrized corpus:
+  raw scores, bureau names, haircut/model logic, policy ids, protected
+  characteristics — each flagged with the right category) +
+  `test_tampered_policy_still_cannot_emit_forbidden_wording` (approved
+  wording itself tampered with forbidden content → FilterViolationError,
+  the fail-closed guarantee) + `test_no_silent_truncation_path_exists`.
+- Composition: `test_14_march_decline_maps_to_ltv_wording_only` (score 612
+  ≥ floor 600 → criteria sentence correctly absent; decline is
+  policy-driven), `test_score_below_floor_adds_the_criteria_wording`,
+  `test_external_text_carries_no_figures_or_internal_detail`.
+- All deterministic, no LLM (rule 9). 15 filter unit tests + 2 journey
+  tests; existing 36 orchestrator tests pass unchanged.
+
+**Self-caught during build:** first draft of the filter tests used
+`dataclasses.replace` on `ReconstructedDecision` — a frozen *pydantic*
+model, not a dataclass; would have TypeError'd. Caught before first run,
+switched to `model_copy(update=...)` (FilterPolicy IS a dataclass, so
+`replace` stays correct there).
+
+- **Status:** implemented, verified live, README ticked, committed, pushed
+  via SSH. PR to open via web. Awaiting architect review + merge before
+  WP-17.
