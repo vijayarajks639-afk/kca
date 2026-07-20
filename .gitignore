@@ -7,6 +7,8 @@ __pycache__/
 *.egg-info/
 kca/contracts/schemas/
 contracts/schemas/
-# WP-18: generated eval report (CI uploads it as an artifact; never committed)
+# WP-18/WP-19: generated eval reports (CI uploads them as artifacts; never committed)
 evals-report.json
 evals-report.md
+judge-calibration.json
+judge-calibration.md

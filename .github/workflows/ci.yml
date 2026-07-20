@@ -39,3 +39,18 @@ jobs:
           path: |
             evals-report.json
             evals-report.md
+      # WP-19 judge calibration: report judge-human agreement over the SME
+      # calibration set. ADVISORY — LLM judgment never blocks a merge (rule 9;
+      # the deterministic gate above is the only gate), so this step is
+      # continue-on-error and its report is always uploaded.
+      - name: Judge calibration (advisory)
+        continue-on-error: true
+        run: python -m kca.evals.judge --output judge-calibration.json
+      - name: Upload judge calibration report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: judge-calibration
+          path: |
+            judge-calibration.json
+            judge-calibration.md
