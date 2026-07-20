@@ -9,7 +9,7 @@ import pytest
 
 from kca.contracts import CallerIdentity
 from kca.contracts.ledger import LedgerEventType
-from apps.review_ui.service import (
+from kca.apps.review_ui.service import (
     Disposition,
     ReviewError,
     ReviewService,

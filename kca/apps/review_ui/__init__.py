@@ -2,7 +2,7 @@
 APPROVAL_REQUIRED pause: accept / amend / reject / escalate by a named
 reviewer, every disposition ledgered."""
 
-from apps.review_ui.service import (
+from kca.apps.review_ui.service import (
     DispositionResult,
     ReviewCase,
     ReviewService,

@@ -1109,3 +1109,78 @@ disposition→status map before first run.
   via SSH. PR to open via web. This closes E4 (Credit Risk DIP + the worked
   journey). Awaiting architect review + merge before WP-18 (start of E5,
   Assurance).
+
+---
+
+## WP-17b — Review UI: persistence + browser UI + OIDC (demo-readiness follow-up)
+- **Branch:** `wp-17b-review-ui-persist-oidc`. **Base:** off `main`
+  (`d7b40ff`, post-WP-17 merge) in worktree `Projects/kca-wp17b`.
+- **Why:** architect review of WP-17 found four demo-blocking gaps (WP-17 met
+  its two card criteria but the queue was in-memory, the API was JSON-only,
+  identity was self-asserted, and `apps/` sat at top level). This WP
+  completes the WP-17 card's intent. **Hard constraint honored: ReviewService's
+  gates and ledger behaviour were NOT changed — only storage was made
+  injectable — so all WP-17 tests kept passing.**
+- **Verified live**: full suite **405 passed, 0 skipped** — Postgres 16 +
+  pgvector + Keycloak up; `alembic upgrade head` → **0006** (new migration);
+  ruff clean. (+11 over WP-17's 394: persistence 1, UI 7, OIDC-login 3.)
+
+**(1) Persistence — the inherited criterion WP-17 missed.**
+- `infra/migrations/versions/0006_review_cases.py`: `review` schema +
+  `review.review_cases` table (jsonb columns for decision/retrieved/draft/
+  filtered/trace, status index). Reversible (`DROP SCHEMA review CASCADE`).
+- `kca/apps/review_ui/store.py`: a `CaseStore` Protocol with two backings —
+  `InMemoryCaseStore` (the WP-17 default, kept for the no-DB tests) and
+  `PostgresCaseStore` (total, lossless serialise/deserialise of the case's
+  Pydantic + dataclass artifacts). `ReviewService` now delegates all queue
+  storage to an injected store (default in-memory); its constructor gained
+  `case_store=None`, nothing else changed. Lazy import of the default breaks
+  the store↔service import cycle.
+- Acceptance test `tests/test_persistence.py` (live DB): a case enqueued by
+  "process 1" (connection closed, service deleted) is listed AND
+  dispositioned by a fresh "process 2" service that shares no in-memory
+  state — then `verify_chain` over the ledger passes and the case is
+  "accepted" in the durable store. The exact enqueue→restart→disposition
+  scenario the architect specified.
+
+**(2) Server-rendered browser UI (Jinja, no build chain).**
+- `kca/apps/review_ui/templates/{base,login,queue,case}.html` + `/ui/*`
+  routes: `/ui/queue` (pending list), `/ui/cases/{id}` (evidence — decision +
+  retrieved sources; internal draft with citations; customer-facing text;
+  validation trace — plus accept/reject/escalate/amend buttons). Inline CSS,
+  zero JS build. The JSON API is retained unchanged for programmatic callers.
+
+**(3) Reviewer identity from the Keycloak OIDC session, not the request body.**
+- `kca/apps/review_ui/auth.py`: `keycloak_direct_grant(username, password)`
+  (reuses WP-08's flow against the `kca` realm) decoded via the existing
+  `caller_from_oidc_claims` — the role authz checks is the one Keycloak
+  issued. Injectable `Authenticator` so the UI is testable with a fake and
+  runs on real Keycloak in the demo/live test.
+- `app.py`: `SessionMiddleware` (signed cookie) + `/login` (direct-grant
+  form) → session; every `/ui/*` disposition reads the reviewer from the
+  session, NEVER a form field — the disposition form posts only an action.
+  `test_ui.py::test_accept_via_ui_records_the_session_reviewer_not_a_form_field`
+  proves the ledger's approver is the logged-in identity; an
+  unauthorised-user can log in but the service's authz gate still 403s their
+  disposition with nothing recorded.
+
+**(4) `apps/` → `kca/apps/`.** `git mv` + import rewrite
+(`from apps.review_ui` → `from kca.apps.review_ui`); pyproject
+`packages.find` → `["kca*"]` and `testpaths` → `["kca", "infra"]` (kca/apps
+now under kca); CLAUDE.md repo-layout line updated. Removes the top-level
+importable `apps/` that mildly deviated from the single-kca-package rule.
+Fixed the moved live test's `REPO_ROOT` (parents[3]→[4], one deeper now).
+
+**Flagged dependency additions (pyproject):** `jinja2>=3.1` (templates),
+`itsdangerous>=2.2` (signed session cookies), `python-multipart>=0.0.9` (HTML
+form parsing) — all previously only transitively present; declared so CI's
+`pip install -e ".[dev]"` gets them.
+
+**Testability split (documented):** the JSON API keeps body-supplied reviewer
+identity (used by the existing programmatic tests); the browser UI derives
+identity from the authenticated session. Same `ReviewService`, same gates —
+the difference is only how the web layer obtains the reviewer.
+
+- **Status:** implemented, verified live, backlog note added, committed,
+  pushed via SSH. PR to open via web. Completes WP-17. Awaiting architect
+  review + merge before WP-18.

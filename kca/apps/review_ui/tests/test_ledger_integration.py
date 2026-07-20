@@ -39,9 +39,9 @@ from kca.platform.retrieval.service import RetrievalService
 from kca.platform.router.router import GovernedRouter
 from kca.platform.semantics.service import SemanticsService
 from kca.services.rules_engine.engine import rederive
-from apps.review_ui.service import ReviewService
+from kca.apps.review_ui.service import ReviewService
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 ALEMBIC_INI = REPO_ROOT / "infra" / "alembic.ini"
 DSN = os.environ.get("KCA_DATABASE_URL", "postgresql://kca:kca@localhost:5432/kca")
 

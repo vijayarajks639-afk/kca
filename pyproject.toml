@@ -12,6 +12,9 @@ dependencies = [
   "psycopg[binary]>=3.2",
   "pgvector>=0.3",
   "httpx>=0.27",
+  "jinja2>=3.1",          # WP-17b: server-rendered review UI templates
+  "itsdangerous>=2.2",    # WP-17b: signed session cookies (OIDC reviewer session)
+  "python-multipart>=0.0.9",  # WP-17b: HTML form parsing (login + disposition)
 ]
 
 [project.optional-dependencies]
@@ -19,7 +22,7 @@ dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.6", "respx>=0.21"]
 orchestrator = ["langgraph>=0.2"]
 
 [tool.setuptools.packages.find]
-include = ["kca*", "apps*"]
+include = ["kca*"]
 exclude = ["infra*", "docs*"]
 
 [tool.ruff]
@@ -28,4 +31,4 @@ target-version = "py312"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["kca", "apps", "infra"]
+testpaths = ["kca", "infra"]
