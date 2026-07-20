@@ -1184,3 +1184,72 @@ the difference is only how the web layer obtains the reviewer.
 - **Status:** implemented, verified live, backlog note added, committed,
   pushed via SSH. PR to open via web. Completes WP-17. Awaiting architect
   review + merge before WP-18.
+
+## WP-18 — Eval harness + golden-set runner in CI
+- **Branch:** `wp-18-eval-harness-golden` (card's canonical name).
+- **Base:** off `main` (`c7ff9d4`, post-WP-17b) in worktree `Projects/kca-wp18`.
+  Deps WP-13 (the DIP's `golden_set.json` + `GoldenSet`/`EvaluationGate`
+  contracts) and WP-15 (the eight-step journey the cases run through) both
+  merged.
+- **New package `kca/evals/harness/`** (fills the WP-01 `kca/evals/` scaffold).
+  No new dependencies; no `contracts/` changes; touches no other package's
+  code — it *composes* their public services/contracts, which is the harness's
+  whole job. Report shapes are eval-local (plain Pydantic `BaseModel`, not a
+  registered `ContractModel`), so the contracts completeness test is untouched.
+
+**What it does.** Runs each case the DIP's golden set declares through the REAL
+credit-decline pipeline (live knowstore, retrieval + permission filter,
+semantics, router, rules engine) and scores the outcome:
+- `report.py` — `CheckResult` / `CaseResult` / `HarnessReport`; `to_json()`
+  (the CI artifact) + `to_markdown()` (the run-log summary). `regressed` is the
+  merge gate.
+- `checks.py` — the three deterministic checks as pure functions over a run's
+  artifacts: **citation resolution** (every `[cite:src|ver]` resolves to a
+  retrieved version), **numeric fidelity** (every figure is one the rules
+  engine backs — never re-computed here), **access compliance** (the seeded
+  out-of-jurisdiction strong match `US-CP-900` never reached the candidate
+  set). No LLM — deterministic, per CLAUDE.md rule 9 (the Claude judge is WP-19).
+- `runner.py` — DIP-agnostic `run_golden_set(golden_set, min_pass_rate,
+  case_runner)`. An abstention case must abstain with exactly its declared
+  reason code(s); a no-code case must run the worked path AND clear every
+  check. `pass_rate < min_pass_rate` ⇒ `regressed`.
+- `credit_risk.py` — the credit-risk realizer, mapping each declared case to
+  the real journey by varying only what the scenario varies: worked decline =
+  app-88231 / GB credit-officer; unknown = app-99999 → `MISSING_DECISION_RECORD`;
+  exposure-without-context = app-88231 / GB **auditor** (authorised to retrieve
+  via the `audit` purpose, but their role selects neither exposure sense) →
+  `AMBIGUOUS_TERM`; mismatch = the committed tamper fixture (real 14-March
+  features, recorded outcome flipped to `approve`) → the real rules engine
+  re-derives decline → `REDERIVATION_MISMATCH`.
+- `cli.py` + `__main__.py` — `python -m kca.evals.harness`: self-seeds the DB,
+  runs the golden set, writes `evals-report.json` + `.md`, prints the summary,
+  and **exits non-zero on regression** (acceptance criterion 1). Split so the
+  exit-code path (`render_report`) is unit-tested without a DB.
+
+**Deliberate, flagged choices** (keep this a *deterministic* gate): the gateway
+runs over a fixed, faithful fake client (no live model / API key — the happy
+draft is citation-correct and numeric-faithful by construction); eval runs are
+assurance, not production decisions, so nothing is written to the ledger
+(`ledger_recorder=None`).
+
+**CI (`.github/workflows/ci.yml`):** after `pytest`, a new *Eval gate* step runs
+the harness (blocks merge on regression); an *Upload eval report* step with
+`if: always()` attaches `evals-report.{json,md}` to **every** run, pass or fail
+(acceptance criterion 2). `.gitignore` ignores the generated report so it's
+never committed.
+
+**Acceptance criteria → evidence:**
+- *Merge blocked on regression below DIP thresholds* → `runner`'s `regressed`
+  flag + CLI exit code; `test_runner.py` (both sides of the threshold) and
+  `test_cli.py` (exit 1 still writes the artifact) prove it without a DB.
+- *Report artifact attached to every CI run* → `render_report` always writes
+  before choosing the exit code; CI upload step is `if: always()`.
+
+**Verified live**: full suite **432 passed, 0 skipped, 1 warning** (prior 405 +
+27 new harness tests, incl. the live golden-set run — Postgres 16 + pgvector +
+Keycloak up; alembic → 0006, unchanged; ruff clean). `python -m
+kca.evals.harness` → **PASS, pass rate 100% (4/4)**, DIP threshold 95%, exit 0.
+(The 1 warning is Starlette's own httpx-in-TestClient deprecation — third-party.)
+- **Status:** implemented, verified live, backlog ticked, CI wired. To commit +
+  push via SSH; PR to open via web. Starts E5 (Assurance). Awaiting architect
+  review + merge before WP-19.

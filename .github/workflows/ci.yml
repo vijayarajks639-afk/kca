@@ -25,4 +25,17 @@ jobs:
       - run: ruff check .
       # exit code 5 = no tests collected; passes until WP-02 adds the first tests
       - run: pytest -q || test $? -eq 5
-      # eval gate lands with WP-18: evals/harness blocks merge on golden-set regression
+      # WP-18 eval gate: run the golden set through the real pipeline. A
+      # regression below the DIP's evaluation_gate threshold exits non-zero and
+      # blocks the merge (acceptance criterion 1).
+      - name: Eval gate (golden-set regression)
+        run: python -m kca.evals.harness --output evals-report.json
+      # The report is attached to EVERY run, pass or fail (criterion 2).
+      - name: Upload eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: |
+            evals-report.json
+            evals-report.md
