@@ -38,7 +38,7 @@ Do not start a WP before its dependencies are merged to main.
 
 ### E5 — Assurance (Sprint 4)
 - [x] [WP-18](WP-18.md) Eval harness + golden-set runner in CI — deps: WP-13, WP-15
-- [ ] [WP-19](WP-19.md) Claude judge with SME calibration — deps: WP-18
+- [x] [WP-19](WP-19.md) Claude judge with SME calibration — deps: WP-18
 - [ ] [WP-20](WP-20.md) Abstention trap suite — deps: WP-18
 - [ ] [WP-21](WP-21.md) Ledger reconstruction report — deps: WP-11, WP-15
 

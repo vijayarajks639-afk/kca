@@ -1253,3 +1253,67 @@ kca.evals.harness` → **PASS, pass rate 100% (4/4)**, DIP threshold 95%, exit 0
 - **Status:** implemented, verified live, backlog ticked, CI wired. To commit +
   push via SSH; PR to open via web. Starts E5 (Assurance). Awaiting architect
   review + merge before WP-19.
+
+## WP-19 — Claude judge with SME calibration
+- **Branch:** `wp-19-claude-judge-with` (card's canonical name; worktree branch
+  created as `-calibration` then renamed to match the card).
+- **Base:** off `main` (`a6b8d1b`, post-WP-18) in worktree `Projects/kca-wp19`.
+  Dep WP-18 (the harness this complements) merged.
+- **New package `kca/evals/judge/`.** No new dependencies; no `contracts/`
+  changes; touches no other package's code (composes gateway + router + ledger
+  contracts). Judge shapes are eval-local (plain Pydantic), so the contracts
+  completeness test is untouched.
+
+**The LLM quality layer** (complement to WP-18's deterministic checks): scores
+explanation *grounding*, *terminology*, and *quality* — nothing else.
+- `rubric.py` — closed `JudgeDimension` enum (the 3 quality axes), the 1–5
+  rubric, the system prompt, `EXCLUDED_CONCERNS` (security/authz/access/… — the
+  machine-checkable exclusion list), `JUDGE_VERSION`.
+- `verdict.py` — `JudgeInput` (explanation + evidence — *no* caller identity),
+  `DimensionScore`, `JudgeVerdict`.
+- `judge.py` — `ClaudeJudge`: routes (confidential/reasoning → sonnet in
+  private-cloud, same route as the drafter), calls the governed gateway, parses
+  the reply over the CLOSED dimension set (any other key — e.g. a stray
+  `security` — is dropped), and records the call to the hash-chained ledger as a
+  MODEL_CALL carrying judge version + calibration set + per-dimension scores
+  (rule 4, via `validation_results` annotations — no contract change). No
+  regulated number computed (rule 2): ordinal 1–5 only.
+- `calibration.py` — SME-rated panel, `agreement()` (per-dimension + overall
+  exact-match, within-one, MAE), `AgreementReport` (JSON + Markdown).
+  `calibrated` = overall within-1 ≥ floor (0.8).
+- `fakes.py` + `fixtures/` — offline `CannedJudgeClient` (no API key; canned
+  per-case replies keyed off the CASE_ID the judge writes into its prompt),
+  `calibration_set.json` (5 SME-rated explanations of varying quality),
+  `judge_responses.json` (model replies authored *near* but not *on* the SME
+  scores, so agreement is a genuine computed number).
+- `cli.py` + `__main__.py` — `python -m kca.evals.judge`: judges the panel,
+  writes `judge-calibration.{json,md}`, exits non-zero below the floor.
+
+**Acceptance criteria → evidence:**
+- *Judge-human agreement reported* → `AgreementReport` + the CLI artifact;
+  `test_calibration.py` proves the maths (exact/within-1/MAE, both calibrated
+  and below-floor), `test_cli.py` the reporting. Live CLI run: **CALIBRATED —
+  within-1 100%, exact 80%, MAE 0.20** over 5 cases.
+- *Security/authz checks provably excluded from judge scope* →
+  `test_security_excluded.py`, four ways: (1) no dimension value intersects
+  `EXCLUDED_CONCERNS`; (2) the prompt names security/access/authorisation as
+  out of scope; (3) a rogue `security` score in the model reply is dropped by
+  the closed-set parser; (4) `JudgeInput` carries no identity/authz field; (5)
+  no judge module imports `authz`.
+
+**Deliberate, flagged choices:** offline fake gateway client (no live model /
+key — same constraint as WP-15/WP-18); judge metadata recorded via
+`validation_results` annotations (established orchestrator pattern, no
+`LedgerEvent` field added). **CI:** a `Judge calibration (advisory)` step runs
+the report `continue-on-error: true` and always uploads it — LLM judgment never
+blocks a merge (rule 9; the deterministic gate stays WP-18). `.gitignore`
+ignores the generated report.
+
+**Verified live**: full suite **455 passed, 0 skipped, 1 warning** (prior 432 +
+23 new, incl. the live-ledger chain test — Postgres + pgvector + Keycloak up;
+alembic 0006, no new migration; ruff clean). `python -m kca.evals.judge` →
+CALIBRATED, 5 ledger events recorded, exit 0. (The 1 warning is Starlette's own
+httpx-in-TestClient deprecation — third-party.)
+- **Status:** implemented, verified live, backlog ticked, CI wired. To commit +
+  push via SSH; PR to open via web. Awaiting architect review + merge before
+  WP-20.

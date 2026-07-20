@@ -1,0 +1,45 @@
+{
+  "calibration_set_id": "credit-risk-explanation-cal-v1",
+  "cases": [
+    {
+      "case_id": "cal-decline-faithful",
+      "explanation_text": "Application app-88231 was declined. The loan-to-value of 87% [cite:credit-policy:CP-001|v2-march] exceeds the policy maximum of 80% [cite:credit-policy:CP-001|v2-march] after the 35% collateral haircut [cite:credit-policy:CP-001|v2-march]. The credit score of 612 is above the referral floor, so the decline is policy-driven, not score-driven.",
+      "decision_facts": "Recorded outcome: decline. Re-derived LTV 87%, policy max 80%, haircut 35%, score 612, referral floor 600.",
+      "sources": ["[credit-policy:CP-001|v2-march] Collateral haircut policy (March 2026): 35% haircut, 80% max LTV."],
+      "glossary_terms": ["exposure = EAD (CreditRisk.Exposure)"],
+      "sme_scores": {"grounding": 5, "terminology": 5, "explanation_quality": 5}
+    },
+    {
+      "case_id": "cal-decline-ungrounded",
+      "explanation_text": "Application app-88231 was declined mainly because the applicant's employment history was weak and the property was in a declining postcode. The loan-to-value was also somewhat high.",
+      "decision_facts": "Recorded outcome: decline. Re-derived LTV 87%, policy max 80%, haircut 35%, score 612, referral floor 600.",
+      "sources": ["[credit-policy:CP-001|v2-march] Collateral haircut policy (March 2026): 35% haircut, 80% max LTV."],
+      "glossary_terms": ["exposure = EAD (CreditRisk.Exposure)"],
+      "sme_scores": {"grounding": 2, "terminology": 4, "explanation_quality": 3}
+    },
+    {
+      "case_id": "cal-decline-wrong-term",
+      "explanation_text": "Application app-88231 was declined. The exposure of 87% [cite:credit-policy:CP-001|v2-march] exceeds the maximum carrying value of 80% after the 35% haircut. The score of 612 was acceptable.",
+      "decision_facts": "Recorded outcome: decline. Re-derived LTV 87%, policy max 80%, haircut 35%, score 612, referral floor 600.",
+      "sources": ["[credit-policy:CP-001|v2-march] Collateral haircut policy (March 2026): 35% haircut, 80% max LTV."],
+      "glossary_terms": ["exposure = EAD (CreditRisk.Exposure)"],
+      "sme_scores": {"grounding": 4, "terminology": 2, "explanation_quality": 3}
+    },
+    {
+      "case_id": "cal-decline-verbose",
+      "explanation_text": "So, regarding application app-88231, there are a number of factors that came into play here, and while it can be complex, ultimately what happened, after considering many things, is that the loan-to-value of 87% [cite:credit-policy:CP-001|v2-march], which as you know is computed after the haircut of 35% [cite:credit-policy:CP-001|v2-march], came out above the 80% [cite:credit-policy:CP-001|v2-march] threshold, and the score of 612 was fine.",
+      "decision_facts": "Recorded outcome: decline. Re-derived LTV 87%, policy max 80%, haircut 35%, score 612, referral floor 600.",
+      "sources": ["[credit-policy:CP-001|v2-march] Collateral haircut policy (March 2026): 35% haircut, 80% max LTV."],
+      "glossary_terms": ["exposure = EAD (CreditRisk.Exposure)"],
+      "sme_scores": {"grounding": 5, "terminology": 4, "explanation_quality": 2}
+    },
+    {
+      "case_id": "cal-decline-excellent",
+      "explanation_text": "Application app-88231 was declined: the loan-to-value of 87% [cite:credit-policy:CP-001|v2-march] exceeds the 80% maximum [cite:credit-policy:CP-001|v2-march] after the 35% collateral haircut [cite:credit-policy:CP-001|v2-march]. The credit score of 612 is above the referral floor, so this is a policy-driven decline.",
+      "decision_facts": "Recorded outcome: decline. Re-derived LTV 87%, policy max 80%, haircut 35%, score 612, referral floor 600.",
+      "sources": ["[credit-policy:CP-001|v2-march] Collateral haircut policy (March 2026): 35% haircut, 80% max LTV."],
+      "glossary_terms": ["exposure = EAD (CreditRisk.Exposure)"],
+      "sme_scores": {"grounding": 5, "terminology": 5, "explanation_quality": 5}
+    }
+  ]
+}
