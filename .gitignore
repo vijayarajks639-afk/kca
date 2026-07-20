@@ -7,3 +7,6 @@ __pycache__/
 *.egg-info/
 kca/contracts/schemas/
 contracts/schemas/
+# WP-18: generated eval report (CI uploads it as an artifact; never committed)
+evals-report.json
+evals-report.md
