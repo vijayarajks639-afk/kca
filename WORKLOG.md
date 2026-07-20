@@ -1035,3 +1035,77 @@ switched to `model_copy(update=...)` (FilterPolicy IS a dataclass, so
 - **Status:** implemented, verified live, README ticked, committed, pushed
   via SSH. PR to open via web. Awaiting architect review + merge before
   WP-17.
+
+---
+
+## WP-17 — Review UI
+- **Branch:** `wp-17-review-ui` (card's canonical name).
+- **Base:** off `main` (`ecfbf89`, post-WP-16) in worktree `Projects/kca-wp17`.
+  Dep WP-15 (the journey whose APPROVAL_REQUIRED pause this consumes) merged.
+- **First WP outside the `kca` package** — lives under `apps/` (not part of
+  the kca importable package, per CLAUDE.md's repo layout). FastAPI + httpx
+  are already core deps (pyproject), so no new dependency.
+- **Naming (flagged):** CLAUDE.md's layout names it `apps/review-ui/`
+  (hyphenated), but the FastAPI app + service are importable Python, and a
+  hyphen isn't a valid identifier — so the package is `apps/review_ui/`
+  (underscore), the same hyphen-dir/underscore-module split established since
+  WP-13. `apps/__init__.py` added so `apps.review_ui` imports.
+- **pyproject (flagged):** `testpaths` extended `["kca", "infra"]` →
+  `["kca", "apps", "infra"]` so the review-UI tests are collected. CI's
+  `pytest -q` now also runs `apps/`.
+- **Verified live**: full suite **394 passed, 0 skipped, 1 warning** —
+  Postgres 16 + pgvector + Keycloak up; alembic → 0005 (unchanged); ruff
+  clean. (The 1 warning is Starlette's own deprecation of httpx in its
+  TestClient — third-party, not our code.)
+
+**Design — thin web layer, fat testable core:**
+- `apps/review_ui/service.py`: `ReviewService`, framework-free. Cases enter
+  the queue from a `JourneyResult` that paused APPROVAL_REQUIRED (WP-15).
+  Four dispositions — accept / amend / reject / escalate — each by a NAMED
+  reviewer. The gate fails closed TWICE before anything is recorded: unnamed
+  reviewer (blank caller_id/role → `UnnamedReviewerError`) and unauthorised
+  reviewer (platform/authz denies → `UnauthorisedReviewerError`). Composes
+  only public services + contract shapes (LedgerRepository.append,
+  AuthzService.decide, ExplanationPolicyFilter.screen — rule 5).
+- `apps/review_ui/app.py`: `create_app(service) -> FastAPI` — /queue,
+  /cases/{id}, POST /cases/{id}/disposition. Maps HTTP→service and the
+  service's exceptions to 400/403/404; every rule lives in the service, so
+  it's enforced identically however the service is driven.
+
+**Flagged journey touch (`journeys/credit_decline.py`):** the review step
+now surfaces `decision` + `retrieved` + `draft` + `filtered` on its
+APPROVAL_REQUIRED outcome (not just `filtered`). Necessary because
+`JourneyResult.data` is only the FINAL step's outcome data, not the
+accumulated state — so the queue's case view needs the full evidence bundle
+carried on the review outcome. Existing WP-15/16 journey tests
+(`result.data["filtered"]`) still pass unchanged.
+
+Acceptance criteria → tests:
+- "Every disposition writes reviewer identity to the ledger" →
+  `test_every_disposition_writes_reviewer_identity_to_ledger` (parametrized
+  accept/reject/escalate — each writes a HUMAN_REVIEW event with
+  `approver="rev-771:credit-officer"`) + the two fail-closed tests
+  (unnamed/unauthorised → refused, `ledger.events == []`) +
+  `test_accept_lands_in_real_ledger_and_chain_verifies` (LIVE DB: the full
+  run — 7 journey step events + 1 review disposition — is one continuous
+  hash chain, `verify_chain` passes, reviewer named in the final event).
+- "Amended text re-runs automated validation before send" →
+  `test_clean_amendment_revalidates_then_sends` (rescreen passes → sent) +
+  `test_amendment_with_forbidden_content_is_screened_and_never_sent`
+  (bureau score → screened, `communication_sent` None, case stays pending)
+  + `test_amendment_with_a_stray_figure_is_screened` (numeric fidelity is
+  subsumed by WP-16's no-figures rule — any digit fails). Re-validation
+  reuses the WP-16 filter's `.screen()`; a failed amendment is still
+  ledgered (reviewer tried) but sends nothing and leaves the case pending.
+- Plus the FastAPI TestClient suite (queue/case-view, 404, accept-over-HTTP,
+  400 unnamed, 403 unauthorised, forbidden-amendment screened). 22 apps
+  tests total, all deterministic (rule 9).
+
+**Self-caught during build:** first draft closed case status with
+`action.value + "ed"` → "escalateed"/"rejecteed"; replaced with an explicit
+disposition→status map before first run.
+
+- **Status:** implemented, verified live, README ticked, committed, pushed
+  via SSH. PR to open via web. This closes E4 (Credit Risk DIP + the worked
+  journey). Awaiting architect review + merge before WP-18 (start of E5,
+  Assurance).

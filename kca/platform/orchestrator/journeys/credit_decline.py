@@ -358,11 +358,18 @@ def build_credit_decline_journey(
     def review(state: JourneyState) -> StepOutcome:
         # WP-17's seam: the named-reviewer UI. The journey always pauses here;
         # the orchestrator ledgers this as HUMAN_REVIEW. No auto-approve path.
-        # Both filter artifacts ride on this outcome so the JourneyResult
-        # hands the reviewer's case (internal + external) to WP-17's queue.
+        # The full case rides on this outcome so JourneyResult.data (which is
+        # only the final step's data) hands WP-17's queue everything the case
+        # view shows: evidence (decision + retrieved sources), the internal
+        # draft with its citation spine, and both filter artifacts.
         return StepOutcome(
             status=StepStatus.APPROVAL_REQUIRED,
-            data={"filtered": state.data["filtered"]},
+            data={
+                "decision": state.data["decision"],
+                "retrieved": state.data["retrieved"],
+                "draft": state.data["draft"],
+                "filtered": state.data["filtered"],
+            },
         )
 
     return JourneyDefinition(
