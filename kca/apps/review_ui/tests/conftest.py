@@ -7,6 +7,7 @@ integration is proven separately in test_ledger_integration.py.
 """
 
 from datetime import date
+from uuid import uuid4
 
 import pytest
 
@@ -15,7 +16,7 @@ from kca.contracts.retrieval import RetrievalResponse, RetrievedItem
 from kca.platform.orchestrator.filters import ExplanationPolicyFilter
 from kca.platform.orchestrator.journey import JourneyResult, StepStatus
 from kca.platform.orchestrator.journeys import ExplanationDraft
-from apps.review_ui.service import ReviewService
+from kca.apps.review_ui.service import ReviewService
 
 DECISION = ReconstructedDecision(
     application_id="app-88231",
@@ -70,11 +71,18 @@ def service(ledger) -> ReviewService:
 @pytest.fixture
 def pending_case(service):
     """Enqueue one 14-March decline case paused for review."""
+    return service.enqueue(build_pending_result(), application_id="app-88231")
+
+
+def build_pending_result() -> JourneyResult:
+    """A hand-built APPROVAL_REQUIRED JourneyResult for the 14-March decline —
+    the shape a real journey hands the review queue. Shared by the in-memory
+    fixture above and the live-DB persistence test."""
     filtered = ExplanationPolicyFilter().filter(
         DECISION, internal_text="internal: declined, LTV 87% over the 80% max."
     )
     retrieved = RetrievalResponse(
-        request_id=__import__("uuid").uuid4(),
+        request_id=uuid4(),
         as_of=DECISION.decided_at,
         items=[
             RetrievedItem(
@@ -87,7 +95,7 @@ def pending_case(service):
             )
         ],
     )
-    result = JourneyResult(
+    return JourneyResult(
         status=StepStatus.APPROVAL_REQUIRED,
         data={
             "decision": DECISION,
@@ -101,4 +109,3 @@ def pending_case(service):
         },
         trace=("reconstruct", "retrieve", "rederive", "draft", "validate", "filter", "review"),
     )
-    return service.enqueue(result, application_id="app-88231")

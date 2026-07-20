@@ -41,7 +41,7 @@ top-level importable directory (see "Why a single kca/ package" below for why th
 - kca/services/rules-engine/  deterministic re-derivation
 - kca/evals/              harness · golden sets · judge · abstention traps
 - kca/data/synthetic/     generator + fixtures (incl. the 14-March decline scenario)
-- apps/review-ui/     human review: accept / amend / reject / escalate (not part of the kca package)
+- kca/apps/review_ui/     human review: accept / amend / reject / escalate (FastAPI + server-rendered UI)
 - infra/              docker-compose, migrations, CI helpers (not part of the kca package)
 - docs/               architecture doc, backlog, ADRs (not part of the kca package)
 

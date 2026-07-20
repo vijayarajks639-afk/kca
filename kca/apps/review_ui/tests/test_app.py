@@ -7,7 +7,7 @@ gets 400, an unauthorised one 403 (and nothing recorded), a clean accept
 
 from fastapi.testclient import TestClient
 
-from apps.review_ui.app import create_app
+from kca.apps.review_ui.app import create_app
 
 from .conftest import CREDIT_OFFICER
 

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}KCA review{% endblock %}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; color: #1a1a2e; background: #f4f5f7; }
+    header { background: #16213e; color: #fff; padding: 12px 24px; display: flex;
+             justify-content: space-between; align-items: center; }
+    header a { color: #9ecbff; text-decoration: none; }
+    main { max-width: 900px; margin: 24px auto; padding: 0 24px; }
+    table { border-collapse: collapse; width: 100%; background: #fff; }
+    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #e0e0e0; }
+    .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px;
+            padding: 16px; margin-bottom: 16px; }
+    .card h3 { margin-top: 0; }
+    .pass { color: #1a7f37; } .fail { color: #cf222e; }
+    .cite { color: #0969da; font-family: monospace; font-size: 0.85em; }
+    .external { background: #eef6ff; border-left: 4px solid #0969da; padding: 12px; }
+    button { padding: 8px 14px; border: 0; border-radius: 4px; cursor: pointer;
+             font-size: 14px; margin-right: 6px; }
+    .accept { background: #1a7f37; color: #fff; }
+    .reject { background: #cf222e; color: #fff; }
+    .escalate { background: #9a6700; color: #fff; }
+    .amend { background: #0969da; color: #fff; }
+    textarea { width: 100%; min-height: 70px; font-family: inherit; }
+    .flash { padding: 10px 14px; border-radius: 4px; margin-bottom: 16px; }
+    .flash.err { background: #ffebe9; color: #cf222e; }
+    .flash.ok { background: #dafbe1; color: #1a7f37; }
+    .muted { color: #57606a; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <header>
+    <div><a href="/ui/queue"><strong>KCA — credit-decline review</strong></a></div>
+    <div>
+      {% if reviewer %}<span class="muted">{{ reviewer.caller_id }} ({{ reviewer.role }})</span>
+      &middot; <a href="/logout">log out</a>{% endif %}
+    </div>
+  </header>
+  <main>
+    {% if flash %}<div class="flash {{ flash_kind }}">{{ flash }}</div>{% endif %}
+    {% block body %}{% endblock %}
+  </main>
+</body>
+</html>

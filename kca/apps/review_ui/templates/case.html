@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Case {{ case.application_id }} — KCA review{% endblock %}
+{% block body %}
+  <p><a href="/ui/queue">&larr; queue</a></p>
+  <h2>Application {{ case.application_id }}
+    <span class="muted">({{ case.status }})</span></h2>
+
+  <div class="card">
+    <h3>Evidence — recorded decision</h3>
+    <table>
+      <tr><th>Outcome</th><td>{{ case.decision.recorded_outcome }}</td></tr>
+      <tr><th>Decided at</th><td>{{ case.decision.decided_at }}</td></tr>
+      <tr><th>Policy in force</th><td>{{ case.decision.policy_version }} —
+        {{ case.decision.policy_title }}</td></tr>
+      <tr><th>Recorded LTV / max</th><td>{{ case.decision.recorded_ltv }} /
+        {{ case.decision.policy_max_ltv }}</td></tr>
+      <tr><th>Score / referral floor</th><td>{{ case.decision.credit_score }} /
+        {{ case.decision.policy_referral_floor_score }}</td></tr>
+    </table>
+    <h4>Retrieved sources (as of {{ case.retrieved.as_of }})</h4>
+    <ul>
+      {% for item in case.retrieved.items %}
+      <li><span class="cite">{{ item.source_id }}|{{ item.source_version }}</span>
+        (valid {{ item.valid_from }}–{{ item.valid_to or 'open' }}): {{ item.content }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Internal draft <span class="muted">(model-generated, with citations)</span></h3>
+    <p>{{ case.draft.text }}</p>
+    <p class="muted">Citations:
+      {% for sid, ver in case.draft.cited_source_versions.items() %}
+      <span class="cite">{{ sid }}|{{ ver }}</span>{% endfor %}</p>
+  </div>
+
+  <div class="card">
+    <h3>Customer-facing text <span class="muted">(policy-filtered,
+      {{ case.filtered.policy_version }})</span></h3>
+    <div class="external">{{ case.filtered.external_text }}</div>
+  </div>
+
+  <div class="card">
+    <h3>Automated validation</h3>
+    <p>Executed steps: {{ case.trace | join(' → ') }}</p>
+    <p class="{{ 'pass' if 'validate' in case.trace else 'fail' }}">
+      {{ '✓ validation ran and passed' if 'validate' in case.trace
+         else '✗ validation did not complete' }}</p>
+  </div>
+
+  {% if case.status == 'pending' %}
+  <div class="card">
+    <h3>Disposition <span class="muted">as {{ reviewer.caller_id }}</span></h3>
+    <form method="post" action="/ui/cases/{{ case.case_id }}/disposition"
+          style="display:inline">
+      <input type="hidden" name="action" value="accept">
+      <button class="accept" type="submit">Accept &amp; send</button>
+    </form>
+    <form method="post" action="/ui/cases/{{ case.case_id }}/disposition"
+          style="display:inline">
+      <input type="hidden" name="action" value="reject">
+      <button class="reject" type="submit">Reject</button>
+    </form>
+    <form method="post" action="/ui/cases/{{ case.case_id }}/disposition"
+          style="display:inline">
+      <input type="hidden" name="action" value="escalate">
+      <button class="escalate" type="submit">Escalate</button>
+    </form>
+    <form method="post" action="/ui/cases/{{ case.case_id }}/disposition"
+          style="margin-top:12px">
+      <input type="hidden" name="action" value="amend">
+      <label>Amend the customer-facing text (re-screened before send):
+        <textarea name="amended_text" required></textarea></label>
+      <button class="amend" type="submit">Amend &amp; send</button>
+    </form>
+  </div>
+  {% else %}
+  <p class="muted">This case is closed ({{ case.status }}).</p>
+  {% endif %}
+{% endblock %}

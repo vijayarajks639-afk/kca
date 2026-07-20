@@ -34,6 +34,7 @@ Do not start a WP before its dependencies are merged to main.
 - [x] [WP-15](WP-15.md) Eight-step credit-decline journey end-to-end — deps: WP-12, WP-13, WP-14
 - [x] [WP-16](WP-16.md) Explanation policy filter — deps: WP-15
 - [x] [WP-17](WP-17.md) Review UI — deps: WP-15
+  - [x] WP-17b: persistent case queue (Postgres) + server-rendered UI + Keycloak OIDC session; apps → kca/apps (demo-readiness follow-up)
 
 ### E5 — Assurance (Sprint 4)
 - [ ] [WP-18](WP-18.md) Eval harness + golden-set runner in CI — deps: WP-13, WP-15

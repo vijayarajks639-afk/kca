@@ -97,11 +97,20 @@ class ReviewService:
         *,
         authz: AuthzService | None = None,
         explanation_filter: ExplanationPolicyFilter | None = None,
+        case_store: object | None = None,  # CaseStore (WP-17b); None -> in-memory
     ) -> None:
         self._ledger = ledger
         self._authz = authz or AuthzService()
         self._filter = explanation_filter or ExplanationPolicyFilter()
-        self._cases: dict[str, ReviewCase] = {}
+        # The queue's storage is injectable (WP-17b): the default keeps the
+        # WP-17 in-memory behaviour (and its no-DB tests); PostgresCaseStore
+        # makes the queue survive a restart. Storage is the ONLY thing that
+        # varies — the gates and ledger writes below are identical either way.
+        if case_store is None:
+            from kca.apps.review_ui.store import InMemoryCaseStore  # noqa: PLC0415
+
+            case_store = InMemoryCaseStore()
+        self._store = case_store
 
     # --- queue ---------------------------------------------------------------
 
@@ -120,17 +129,17 @@ class ReviewService:
             filtered=result.data["filtered"],
             trace=result.trace,
         )
-        self._cases[case.case_id] = case
+        self._store.add(case)
         return case
 
     def queue(self) -> list[ReviewCase]:
-        return [c for c in self._cases.values() if c.status == "pending"]
+        return self._store.list_pending()
 
     def case(self, case_id: str) -> ReviewCase:
-        try:
-            return self._cases[case_id]
-        except KeyError:
-            raise UnknownCaseError(case_id) from None
+        found = self._store.get(case_id)
+        if found is None:
+            raise UnknownCaseError(case_id)
+        return found
 
     # --- dispositions --------------------------------------------------------
 
@@ -221,7 +230,7 @@ class ReviewService:
             Disposition.ESCALATE: "escalated",
         }
         if sent or action in (Disposition.REJECT, Disposition.ESCALATE):
-            case.status = closed_status[action]
+            self._store.set_status(case.case_id, closed_status[action])
         # a failed amendment leaves the case pending for re-amendment
 
         return DispositionResult(

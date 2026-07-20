@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Review queue — KCA{% endblock %}
+{% block body %}
+  <h2>Pending review queue</h2>
+  {% if cases %}
+  <table>
+    <thead><tr><th>Application</th><th>Outcome</th><th>Decided</th><th></th></tr></thead>
+    <tbody>
+      {% for c in cases %}
+      <tr>
+        <td>{{ c.application_id }}</td>
+        <td>{{ c.decision.recorded_outcome }}</td>
+        <td>{{ c.decision.decided_at }}</td>
+        <td><a href="/ui/cases/{{ c.case_id }}">open &rarr;</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No cases awaiting review.</p>
+  {% endif %}
+{% endblock %}
