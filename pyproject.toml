@@ -20,6 +20,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.6", "respx>=0.21"]
 orchestrator = ["langgraph>=0.2"]
+# WP-25: read-only Streamlit platform explorer (kca/apps/demo_dashboard).
+# Not required by the core platform or CI — only to run `make dashboard`.
+demo = ["streamlit>=1.36"]
 
 [tool.setuptools.packages.find]
 include = ["kca*"]

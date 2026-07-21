@@ -16,7 +16,10 @@ test:
 schemas:
 	python -m kca.contracts.export_schemas
 
-.PHONY: up down migrate downgrade test schemas
+dashboard:
+	streamlit run kca/apps/demo_dashboard/app.py
+
+.PHONY: up down migrate downgrade test schemas dashboard
 .PHONY: up down migrate downgrade test
 schemas:
 	python -m contracts.export_schemas

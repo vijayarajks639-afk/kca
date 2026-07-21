@@ -1591,6 +1591,90 @@ deprecation — third-party.)
 **Verified live**: full suite **542 passed, 0 skipped, 1 warning** (prior 536 + 6 new
 reuse tests; ruff clean; alembic 0007). `python -m kca.evals.reuse` → SUPPORTED, exit 0.
 (The 1 warning is Starlette's own httpx-in-TestClient deprecation — third-party.)
-- **Status:** implemented, verified live, backlog ticked. To commit + push via SSH;
-  PR to open via web. Awaiting architect review + merge before WP-25 (Demo script +
-  architecture v1.0 — deps WP-21, WP-24; the final WP).
+- **Status:** merged to main via PR #24 (`75ec93a`).
+
+## WP-25 — Demo script + architecture v1.0 (the final WP)
+- **Branch:** `wp-25-demo-script-architecture`
+- **Commit:** (pending — see below)
+- **Scope note:** the card's base scope was docs-only (demo script + as-built
+  architecture doc). The session upgraded the scope to also add a Streamlit
+  platform explorer (`kca/apps/demo_dashboard/`) so the demo script has something
+  concrete to click through, per explicit instruction.
+- **Shipped:**
+  - `kca/apps/demo_dashboard/` — a read-only Streamlit explorer:
+    - `planes.py` — the Five Planes model + a LIVE per-package import probe (no
+      hand-maintained status; if a package won't import, the page shows red).
+    - `dips.py` — loads both domains' `dip.json` verbatim and names the §8.2 field
+      set, so the UI renders both contracts identically and a test asserts
+      completeness.
+    - `data.py` — live Postgres connection + one explicit, idempotent demo-data
+      seed (reuses the exact fixtures the live tests use; never touches the
+      ledger).
+    - `runners.py` — drives the REAL credit-decline and op-risk-investigation
+      journeys (and all their trap/abstention scenarios — every reason code) over
+      the live stack: real knowstore, retrieval + permission filter, router,
+      rules engine, and the hash-chained `LedgerRepository`; only the LLM client
+      is faked (canned, citation-faithful replies — no API key). Returns rich
+      per-step detail (internal draft vs customer-facing filtered wording,
+      citations, retrieved source versions, rules-engine assessment) plus the
+      run's real ledger events, and an in-memory tamper demo
+      (`demonstrate_tamper`) that mutates a COPY of the chain to show
+      tamper-evidence without ever writing to the stored ledger.
+    - `app.py` — the only module that imports `streamlit`; six pages (Five
+      Planes, DIP Contracts, Journeys, Ledger, Router, Reuse).
+  - `pyproject.toml` — new `demo` extra (`streamlit>=1.36`); not required by core
+    or CI. `Makefile` — new `dashboard` target.
+  - `docs/demo-script.md` — click-by-click walkthrough for a non-technical
+    presenter: both worked journeys, an abstention trap, a ledger reconstruction
+    + tamper demo, and the reuse verdict, with a troubleshooting section.
+  - `docs/architecture-v1.md` — as-built architecture doc: the five-layer
+    boundary, five planes, the spine/DIP split, and **10 explicitly flagged
+    deltas** from the original design (journeys-as-DIP-assets, the single
+    `corpus_candidates`/`corpus_pointers` reader, the `kca_app` least-privilege
+    ledger role, inference_time only on model-call events, op-risk's
+    no-grant-role unauthorised trap, deterministic zero-LLM-words external
+    wording, Postgres-first/graph-stub, single `kca/` package root, optional
+    LangGraph, and `float` vs `Decimal` for money/ratios — the last flagged as a
+    known prototype simplification, not a recommendation for production).
+  - Tests: `kca/apps/demo_dashboard/tests/test_dashboard.py` (22 structural
+    tests — no DB: every plane's packages import, both DIPs carry every §8.2
+    field, scenarios cover every abstention reason code, a worked path exists
+    per domain, and the logic modules never import streamlit so core CI is
+    unaffected by the `demo` extra); `test_runners_live.py` (live: both worked
+    journeys reach human review with a verified chain; all 8 trap scenarios
+    fail closed to their exact reason code; tamper is detected; skips without
+    Postgres); `test_app_smoke.py` (Streamlit `AppTest` — the app boots and
+    every one of the six pages renders with no exception; skips without the
+    `demo` extra installed).
+- **Bug found and fixed during verification:** `data.data_present()` ran three
+  `SELECT`s but never closed the transaction. Visiting the Journeys/Ledger pages
+  (as the AppTest page-cycle smoke does) left the dashboard's cached connection
+  idle-in-transaction, holding a read lock on `knowstore.decision_records` /
+  `op_risk_incidents`. When the full suite then ran another live test's fixture
+  (`TRUNCATE`/reseed on those same tables), it blocked indefinitely waiting for
+  that lock — `pytest -q` hung with zero output for 20+ minutes (looked like a
+  runaway test, not a deadlock, until isolated). Fixed with an explicit
+  `conn.rollback()` at the end of `data_present()` (read-only probe, nothing to
+  persist). Re-ran the full suite twice after the fix with no hang. (A first,
+  apparently-hung run earlier in the session turned out to be a false alarm —
+  the shell's cwd had drifted to the outer personal-workspace repo via an
+  unrelated `cd`, so pytest was collecting unrelated sibling projects; re-run
+  from the correct worktree cwd was fast. The dangling-transaction bug above is
+  the real, separately-confirmed issue, isolated by running the dashboard-only,
+  everything-but-AppTest, and full suites in stages.)
+- **Reuse doc regenerated:** WP-24's `docs/reuse-measurement.md` counts
+  `kca/apps` as reusable substrate — adding the dashboard there (as generic
+  platform tooling, not domain code) correctly shifted the measured figures.
+  Regenerated via `python -m kca.evals.reuse`; updated the two new docs' cited
+  figures from the WP-24-time 91.6%/9% to the current **92.5% reused / 8%
+  marginal footprint**; `test_published_doc_is_in_sync_with_the_tool` enforces
+  this never drifts by hand-edit.
+- **Verified live**: `make up && make migrate` clean; ruff clean (whole repo);
+  full suite **564 passed, 2 skipped, 0 failed** (prior 542 + ~22 new dashboard
+  tests, minus 2 environment-dependent skips) in 194s. `make dashboard` boots
+  and all six pages render (confirmed both via Streamlit `AppTest` in-process
+  and by driving `runners.run_scenario` directly against the live stack for
+  every credit and op-risk scenario, including the tamper demo).
+- **Status:** implemented, verified live, backlog ticked. To commit + push via
+  SSH; PR to open via web. Per protocol, **holding for architect review + merge**
+  — this is the final WP in the execution order.
