@@ -1,6 +1,6 @@
 # Reuse measurement — adding domain #2 (operational risk)
 
-**✅ marginal-cost claim SUPPORTED.** Domain #2 reused **93%** of the codebase by size and added **0** platform components — its marginal footprint is **8%** of the reusable substrate.
+**✅ marginal-cost claim SUPPORTED.** Domain #2 reused **92.5%** of the codebase by size and added **0** platform components — its marginal footprint is **8%** of the reusable substrate.
 
 _Computed from the repository by `python -m kca.evals.reuse` (non-blank production lines). LOC is a size proxy, not person-hours._
 

@@ -1678,3 +1678,24 @@ reuse tests; ruff clean; alembic 0007). `python -m kca.evals.reuse` → SUPPORTE
 - **Status:** implemented, verified live, backlog ticked. To commit + push via
   SSH; PR to open via web. Per protocol, **holding for architect review + merge**
   — this is the final WP in the execution order.
+
+**WP-25 review fixes (2026-07-21), commit `e1c968b`.** Architect review on the PR
+flagged: (1) **Makefile** had a stale duplicated `.PHONY`/`schemas` block below the
+correct new one, so `make schemas` was silently shadowed by an old bare
+`contracts.export_schemas` path (pre-`kca/`-package-rename) instead of the correct
+`kca.contracts.export_schemas` — removed the duplicate. (2) **demo-script.md**'s
+quick-reference table still cited WP-24's pre-dashboard 91.6% — fixed to 92.5% to
+match §8 and the doc. Optional, both applied: (3) **reuse-measurement.md**'s
+headline rounded 92.5%→93% (`.0%` format) while the detail line showed 92.5% exactly
+— changed `measure.py`'s headline format to one decimal place so they always agree;
+regenerated the doc. (4) **runners.py**'s credit "Worked decline explanation"
+scenario description said "the full eight steps" but the journey's actual UI trace
+is 7 named steps (the 8th — ledger recording — isn't a distinct step in
+`JourneyDefinition.steps`, per the journey's own module docstring) — reworded to
+"all seven journey steps". Caught during the fix: my own verification run of
+`make schemas` (to confirm fix #1) left generated JSON files under the *gitignored*
+`kca/contracts/schemas/`, which the reuse tool's file walk picked up (it counts
+`.json` files, not git-tracked state) and inflated the contracts LOC — a purely
+local artifact, harmless in CI (which never runs `make schemas` before the reuse
+tool), cleaned up before the final regen. Re-verified live: ruff clean, **564
+passed, 0 skipped, 0 failed**.

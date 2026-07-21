@@ -193,7 +193,7 @@ the case for one shared brain instead of one per department."*
 | Journeys → "Trap · unknown application" | Missing record → refuse, don't invent (`MISSING_DECISION_RECORD`) |
 | Ledger → Run & record → Tamper | Append-only, hash-chained, tamper-evident audit trail |
 | Router | Confidential work pinned to private cloud |
-| Reuse | 91.6% reused when the 2nd domain was added |
+| Reuse | 92.5% reused when the 2nd domain was added |
 
 ## If something looks wrong
 
