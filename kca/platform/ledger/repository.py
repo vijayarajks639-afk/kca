@@ -15,6 +15,7 @@ ledger.events — no join to any other package's table (WP-11 criterion 2).
 from datetime import date, datetime, time, timezone
 
 import psycopg
+from psycopg import sql
 from psycopg.types.json import Json
 
 from kca.contracts.ledger import (
@@ -85,11 +86,20 @@ def _row_to_event(row: tuple) -> LedgerEvent:
 
 
 class LedgerRepository:
-    def __init__(self, conn: psycopg.Connection) -> None:
+    def __init__(self, conn: psycopg.Connection, *, writer_role: str | None = None) -> None:
         self._conn = conn
+        # If set (e.g. "kca_app"), each append runs under that least-privilege
+        # role via SET LOCAL ROLE — so the writer physically cannot UPDATE/
+        # DELETE/TRUNCATE ledger.events (migration 0007). Transaction-scoped:
+        # the role resets on commit, leaving the shared connection untouched.
+        self._writer_role = writer_role
 
     def append(self, event: LedgerEvent) -> LedgerEvent:
         with self._conn.cursor() as cur:
+            if self._writer_role is not None:
+                cur.execute(
+                    sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(self._writer_role))
+                )
             cur.execute("SELECT event_hash FROM ledger.chain_head FOR UPDATE")
             (prev_hash,) = cur.fetchone()
 
