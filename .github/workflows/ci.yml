@@ -39,6 +39,20 @@ jobs:
           path: |
             evals-report.json
             evals-report.md
+      # WP-20 abstention-trap gate: spring every seeded trap against the real
+      # pipeline. Abstention is a deterministic safety property (rule 7) — a
+      # trap that fails to abstain, abstains with the wrong code, or produces a
+      # fluent answer exits non-zero and blocks the merge.
+      - name: Abstention-trap gate
+        run: python -m kca.evals.traps --output traps-report.json
+      - name: Upload abstention-trap report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: traps-report
+          path: |
+            traps-report.json
+            traps-report.md
       # WP-19 judge calibration: report judge-human agreement over the SME
       # calibration set. ADVISORY — LLM judgment never blocks a merge (rule 9;
       # the deterministic gate above is the only gate), so this step is

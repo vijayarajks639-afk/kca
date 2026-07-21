@@ -1317,3 +1317,66 @@ httpx-in-TestClient deprecation — third-party.)
 - **Status:** implemented, verified live, backlog ticked, CI wired. To commit +
   push via SSH; PR to open via web. Awaiting architect review + merge before
   WP-20.
+
+## WP-20 — Abstention trap suite
+- **Branch:** `wp-20-abstention-trap-suite` (card's canonical name).
+- **Base:** off `main` (`3821b1e`, post-WP-19) in worktree `Projects/kca-wp20`.
+  Dep WP-18 merged.
+- **New package `kca/evals/traps/`.** No new dependencies; no `contracts/`
+  changes; touches no other package's code (composes the same journey + services
+  WP-18 does). Self-contained — does *not* import WP-18's harness, so the two
+  eval batteries stay decoupled.
+
+**An adversarial abstention battery** — the complement to WP-18's correctness
+harness. Five seeded traps, each sprung against the REAL credit-decline journey,
+each of which MUST end in the right reason-coded abstention and never a fluent
+answer (rule 7). Covers every abstention code, **including the two WP-18's
+golden set never exercises** (version conflict, unauthorised requester):
+  - `trap-missing-record` → MISSING_DECISION_RECORD (app-99999, no record)
+  - `trap-unauthorised-requester` → UNAUTHORISED_SOURCE (an ungranted caller —
+    the realm's `unauthorised-user` — is denied at retrieval)
+  - `trap-rederivation-mismatch` → REDERIVATION_MISMATCH (tamper fixture:
+    recorded outcome flipped, real rules engine catches it)
+  - `trap-ambiguous-exposure` → AMBIGUOUS_TERM (a GB auditor: authorised to
+    retrieve, but the role selects neither exposure sense)
+  - `trap-version-conflict` → VERSION_CONFLICT (a crafted model draft citing the
+    MAY revision against a MARCH decision — the validate step must catch the
+    stale citation, not send it)
+- `report.py` — `TrapResult` / `TrapReport` (JSON + Markdown); the load-bearing
+  `fluent_answer` flag (produced an answer where a refusal was required).
+- `suite.py` — generic `Trap` / `TrapOutcome` / `evaluate_trap` / `run_trap_suite`
+  (DIP-agnostic; a second DIP plugs in its own runner unchanged). A trap passes
+  only on the expected abstention with no fluent answer; the suite is `correct`
+  only when correctness clears the floor AND no trap confabulated (one fluent
+  answer fails outright).
+- `credit_risk.py` — the 5 traps + `CreditRiskTrapRunner` (dispatches each trap
+  to the right inputs/gateway over live services) + fixed-reply fake gateways
+  (faithful + wrong-version). Only the version-conflict trap reaches the drafter;
+  the other four abstain before the gateway is ever called.
+- `cli.py` + `__main__.py` — `python -m kca.evals.traps`: migrate/seed, spring
+  all traps, write `traps-report.{json,md}`, exit non-zero below floor or on any
+  fluent answer.
+
+**Acceptance criteria → evidence:**
+- *Abstention correctness above threshold* → `run_trap_suite` + floor (default
+  1.0, all-or-nothing); `test_suite.py` proves the maths, `test_traps_live.py`
+  the live 5/5. Live CLI: **PASS — correctness 100% (5/5), no fluent answers**.
+- *Each trap yields the right reason code, never a fluent answer* →
+  `test_traps_live.py` asserts each trap's `observed_reason_code` == expected and
+  `fluent_answer` is False; the `fluent_answer` danger flag fails the suite if a
+  trap ever confabulates.
+
+**Flagged choices:** offline fixed-reply fake gateways (no API key — same
+constraint as WP-15/18/19); trap runs are assurance, not decisions, so
+`ledger_recorder=None`. **CI:** a blocking `Abstention-trap gate` step (like
+WP-18's golden-set gate — abstention is deterministic, rule 7/9) + always-upload
+the report; `.gitignore` ignores it.
+
+**Verified live**: full suite **471 passed, 0 skipped, 1 warning** (prior 455 +
+16 new, incl. the 3 live trap tests — Postgres + pgvector + Keycloak up; alembic
+0006, no new migration; ruff clean). `python -m kca.evals.traps` → PASS, 5/5,
+exit 0. (The 1 warning is Starlette's own httpx-in-TestClient deprecation —
+third-party.)
+- **Status:** implemented, verified live, backlog ticked, CI wired. To commit +
+  push via SSH; PR to open via web. Awaiting architect review + merge before
+  WP-21.
