@@ -1435,3 +1435,57 @@ httpx-in-TestClient deprecation — third-party.)
 - **Status:** implemented, verified live, backlog ticked. Closes E5 (Assurance).
   To commit + push via SSH; PR to open via web. Awaiting architect review +
   merge before WP-22 (start of E6 — Operational Risk DIP).
+
+## WP-22 — Operational Risk DIP (start of E6 — Portability proof)
+- **Branch:** `wp-22-operational-risk-dip` (card's canonical name).
+- **Base:** off `main` (`f91bdce`, post-WP-21) in worktree `Projects/kca-wp22`.
+  Deps WP-13 (DIP contract + assets) + WP-18 (harness), both merged.
+- **The entire WP touches only `kca/dips/**` + docs** — no platform, contracts,
+  services, infra, or migration change. Confirmed at the file level (`git status`)
+  and at runtime (the portability report). This IS the portability thesis.
+
+**A second domain (incident investigation) onboarded as DIP assets only,** running
+on the UNCHANGED spine. Pre-existing scaffolding made this a pure DIP addition: the
+`knowstore.op_risk_incidents` table (migration 0003), the incident fixtures + loader
+(WP-04), the `op-risk-investigator`/`op_risk_investigation` authz grant (WP-08), and
+`seed_corpus(docs=...)` all already existed — so op-risk needed no platform change.
+- **DIP data** `kca/dips/op-risk/`: dip.json (op-risk DIPContract — investigator
+  access policy, own eval gate `op-risk-incident-v1`, full abstention vocabulary,
+  no semantic extensions), golden_set.json (4 cases), agent_instructions.md.
+- **DIP code** `kca/dips/op_risk/` (self-contained, ALL under kca/dips): `loader.py`
+  (mirrors credit_risk), `incidents.py` (IncidentRecord + reader over the DIP's own
+  declared dataset), `rules.py` (deterministic materiality banding — the DIP's own
+  LLM-free calculator, rule 2), `corpus.py` (control-library SeedDocs seeded via the
+  unchanged `seed_corpus`), `journey.py` (`build_incident_investigation_journey`:
+  reconstruct → retrieve → assess → draft → validate → review, all on the spine),
+  `portability.py` (the diff report).
+
+**Acceptance criteria → evidence:**
+- *Op-risk investigation runs on the UNCHANGED journey spine* →
+  `test_investigation_live.py`: the investigation runs the full 6-step journey
+  through the same Orchestrator/engine/journey-model + RetrievalService (pre-ranking
+  permission filter) + GovernedRouter + ClaudeGateway + hash-chained LedgerRepository,
+  reaching human review with 6 ledgered events that `verify_chain` accepts; the model
+  call routes to sonnet/private-cloud. Three traps fire: missing incident
+  (MISSING_DECISION_RECORD), unauthorised caller (UNAUTHORISED_SOURCE), stale control
+  citation (VERSION_CONFLICT).
+- *Diff report proves only DIP assets differ* → `portability.py` introspects the real
+  component module of each role for both domains: the 8 spine roles (engine,
+  orchestrator, journey-model, retrieval, router, gateway, ledger, authz) resolve to
+  the IDENTICAL `kca.platform.*` module for both; the 4 differing roles (record_source,
+  rules, journey_builder, dip_config) all resolve, for op-risk, to `kca.dips.op_risk.*`.
+  `only_dip_assets_differ` is True. `test_portability.py` asserts it; the file-level
+  git diff corroborates (kca/dips only).
+
+**Flagged:** none — no new deps, no contracts changes, no platform/infra changes. The
+op-risk rules live under the DIP (not services/rules-engine) BY DESIGN — a domain
+brings its own deterministic decision logic as a DIP asset; rule 2's principle (LLM
+never computes the figure) is upheld.
+
+**Verified live**: full suite **509 passed, 0 skipped, 1 warning** (prior 485 + 24 new,
+incl. 5 live op-risk investigation tests — Postgres + pgvector + Keycloak up; alembic
+0006, no new migration; ruff clean). The WP-18 credit golden-set gate still passes
+(op-risk left credit untouched). Portability report: only_dip_assets_differ=True.
+- **Status:** implemented, verified live, backlog ticked. To commit + push via SSH;
+  PR to open via web. Awaiting architect review + merge before WP-23 (Cross-domain
+  discovery index — deps WP-06, WP-22).
