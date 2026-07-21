@@ -1,6 +1,6 @@
 # Reuse measurement — adding domain #2 (operational risk)
 
-**✅ marginal-cost claim SUPPORTED.** Domain #2 reused **92%** of the codebase by size and added **0** platform components — its marginal footprint is **9%** of the reusable substrate.
+**✅ marginal-cost claim SUPPORTED.** Domain #2 reused **93%** of the codebase by size and added **0** platform components — its marginal footprint is **8%** of the reusable substrate.
 
 _Computed from the repository by `python -m kca.evals.reuse` (non-blank production lines). LOC is a size proxy, not person-hours._
 
@@ -12,12 +12,12 @@ _Computed from the repository by `python -m kca.evals.reuse` (non-blank producti
 | contracts | 18 | 665 | ✅ reused | 0 lines |
 | services (rules-engine) | 7 | 81 | ✅ reused | 0 lines |
 | data + synthetic + migrations infra | 16 | 1862 | ✅ reused | 0 lines |
-| apps (review UI) | 14 | 631 | ✅ reused | 0 lines |
+| apps (review UI) | 24 | 1652 | ✅ reused | 0 lines |
 | evals (harness · judge · traps) | 43 | 1612 | ✅ reused | 0 lines |
-| **reusable substrate (total)** | 188 | **7609** | ✅ | **0** |
+| **reusable substrate (total)** | 198 | **8630** | ✅ | **0** |
 | **op-risk DIP — NEW for domain #2** | 14 | **699** | — | +699 |
 
-Reused fraction = 7609 / (7609 + 699) = **91.6%** (+190 LOC of op-risk tests).
+Reused fraction = 8630 / (8630 + 699) = **92.5%** (+190 LOC of op-risk tests).
 
 ## Reuse table — architecture (component roles)
 
@@ -29,12 +29,12 @@ Reused fraction = 7609 / (7609 + 699) = **91.6%** (+190 LOC of op-risk tests).
 
 | | Domain #1 (credit) | Domain #2 (op-risk) |
 | --- | --- | --- |
-| Platform substrate | built (~7609 LOC) | reused unchanged (0 LOC) |
+| Platform substrate | built (~8630 LOC) | reused unchanged (0 LOC) |
 | DIP package | ~206 LOC¹ | 699 LOC |
 | New migrations | (WP-04 scaffold) | **0** |
 | New contract schemas | — | **0** |
 | Platform lines changed | — | **0** |
 
-Marginal cost of domain #2 ≈ its DIP = **9%** of the substrate it reused. The platform is amortised across domains: the second domain paid only for its DIP.
+Marginal cost of domain #2 ≈ its DIP = **8%** of the substrate it reused. The platform is amortised across domains: the second domain paid only for its DIP.
 
 ¹ Understates domain #1: credit's journey/reader/rules live in platform (pre-DIP-pattern), not in its DIP package. Op-risk keeps all domain logic in its DIP, so it is the honest measure of a domain's marginal cost — and it is small.
