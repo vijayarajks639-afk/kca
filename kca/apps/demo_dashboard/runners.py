@@ -118,7 +118,7 @@ class Scenario:
 CREDIT_SCENARIOS: tuple[Scenario, ...] = (
     Scenario(
         "credit-worked", "credit-risk", "Worked decline explanation",
-        "app-88231, a GB credit-officer — runs the full eight steps to human review.",
+        "app-88231, a GB credit-officer — runs all seven journey steps to human review.",
         None,
     ),
     Scenario(

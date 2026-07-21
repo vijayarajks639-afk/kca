@@ -136,7 +136,7 @@ class ReuseReport:
         lines = [
             "# Reuse measurement — adding domain #2 (operational risk)",
             "",
-            f"**{verdict}.** Domain #2 reused **{self.reused_fraction:.0%}** of the "
+            f"**{verdict}.** Domain #2 reused **{self.reused_fraction:.1%}** of the "
             f"codebase by size and added **0** platform components — its marginal "
             f"footprint is **{self.marginal_fraction:.0%}** of the reusable substrate.",
             "",
