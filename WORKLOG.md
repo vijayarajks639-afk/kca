@@ -1489,3 +1489,66 @@ incl. 5 live op-risk investigation tests — Postgres + pgvector + Keycloak up; 
 - **Status:** implemented, verified live, backlog ticked. To commit + push via SSH;
   PR to open via web. Awaiting architect review + merge before WP-23 (Cross-domain
   discovery index — deps WP-06, WP-22).
+
+## WP-23 — Cross-domain discovery index (+ two flagged pre-work items)
+- **Branch:** `wp-23-cross-domain-discovery` (card's canonical name).
+- **Base:** off `main` (`a0281b3`, post-WP-22) in worktree `Projects/kca-wp23`.
+  Deps WP-06 (retrieval) + WP-22 (op-risk DIP), both merged.
+
+**PRE-WORK (architect-directed, beyond the WP-23 card — FLAGGED):**
+1. **Migration 0007 — `kca_app` least-privilege role.** DB-level defence-in-depth
+   for rule 4: `kca_app` holds INSERT/SELECT on `ledger.events` but NOT
+   UPDATE/DELETE/TRUNCATE, so the append-only hash chain is enforced by Postgres
+   itself. `LedgerRepository(conn, writer_role="kca_app")` runs each append under
+   `SET LOCAL ROLE` (transaction-scoped; resets on commit; default None keeps the
+   admin-writer behaviour every existing test relies on). `test_append_only_role.py`
+   proves append+verify_chain work under kca_app while UPDATE/DELETE/TRUNCATE raise
+   InsufficientPrivilege; ledger resets run as the admin owner.
+2. **`knowstore.corpus` — close the WP-06 rule-5 deviation.** `corpus_candidates()`
+   (content + ranking inputs, for retrieval) and `corpus_pointers()` (metadata only,
+   no content, for discovery) are now the ONLY readers of `knowstore.corpus_items`.
+   RetrievalService refactored to call `corpus_candidates` (owns embedding + fusion;
+   no longer touches the table). Retrieval + knowstore suites green unchanged.
+
+**WP-23 proper — `kca/platform/discovery/`:**
+- `contracts/discovery.py` (FLAGGED, additive new module like WP-10/WP-11):
+  `DiscoveryRequest`, `DiscoveryPointer` (metadata only — id/version/title/
+  jurisdiction, **no content field**), `DiscoveryResult` (proposed_domains,
+  confidence, widened, pointers, optional reason-coded abstention). Registered in
+  ALL_CONTRACT_MODELS + samples; completeness test green.
+- `domains.py` — `DomainDescriptor` + `descriptor_from_dip` (discovery is
+  DIP-agnostic: a platform package never imports kca.dips; the caller projects each
+  DIPContract → id/allowed_roles/source_ids).
+- `intent.py` — `IntentClassifier`: a governed **Haiku** L4 call
+  (classification → haiku-routing/private-cloud) proposing domains + confidence
+  from the query text only, recorded to the ledger as a MODEL_CALL (rule 4); the
+  parse intersects the answer with the available domains so the model can never
+  invent one.
+- `index.py` — `DiscoveryIndex.discover`: classify → (low confidence widens to all
+  domains) → **authz at each domain boundary** (caller role admitted by the domain's
+  access policy AND authz allows) → `corpus_pointers` (re-applies the
+  jurisdiction+purpose filter). Two independent fail-closed gates. Empty after a
+  widened search → reason-coded AMBIGUOUS_TERM.
+
+**Acceptance criteria → evidence** (`test_discovery_live.py`):
+- *Cross-domain question finds op-risk evidence from a credit query* → an
+  op-risk-investigator's credit-flavoured query surfaces op-risk control pointers
+  (CTRL-DQ-1 …), no abstention.
+- *Authorisation still enforced at each domain boundary* → the SAME query by a
+  credit officer returns credit pointers but **zero** op-risk pointers; an
+  unauthorised caller on a low-confidence query widens then abstains AMBIGUOUS_TERM.
+  The intent call is routed to Haiku and ledgered (verify_chain).
+
+**Flagged summary:** migration 0007 + LedgerRepository.writer_role (ledger pkg);
+knowstore.corpus + RetrievalService refactor (knowstore/retrieval pkgs); new
+contracts/discovery.py module. No new dependencies. All beyond the WP-23 card, done
+at the architect's explicit direction.
+
+**Verified live**: full suite **536 passed, 0 skipped, 1 warning** (prior 509 + 27
+new — incl. 5 append-only-role, 5 live discovery, intent + contract tests; Postgres +
+pgvector + Keycloak up; alembic **0007**; ruff clean). WP-18 harness gate + WP-22
+portability still green. (The 1 warning is Starlette's own httpx-in-TestClient
+deprecation — third-party.)
+- **Status:** implemented, verified live, backlog ticked. To commit + push via SSH;
+  PR to open via web. Awaiting architect review + merge before WP-24 (Reuse
+  measurement — deps WP-22).

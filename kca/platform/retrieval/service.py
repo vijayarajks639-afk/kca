@@ -11,8 +11,9 @@ Only then are the surviving candidates ranked: lexical (tsvector) and vector
 (pgvector) orderings fused with reciprocal-rank fusion. Every hit carries its
 source version and effective (valid-time) dates.
 
-Architect-approved rule-5 exception (see WP-06 PR/WORKLOG): retrieval reads
-knowstore.corpus_items as the shared L1 knowledge plane.
+The corpus table itself is read ONLY through knowstore.corpus (WP-23 closed the
+WP-06 rule-5 deviation): retrieval owns the embedding and the ranking, knowstore
+owns knowstore.corpus_items.
 """
 
 import psycopg
@@ -20,22 +21,9 @@ import psycopg
 from kca.contracts.reason_codes import Abstention, AbstentionReasonCode
 from kca.contracts.retrieval import RetrievalRequest, RetrievalResponse, RetrievedItem
 from kca.platform.authz.service import AuthzService
+from kca.platform.knowstore.corpus import CorpusCandidate, corpus_candidates
 from kca.platform.retrieval.embedding import embed, to_pgvector
 from kca.platform.retrieval.fusion import reciprocal_rank_fusion
-
-_CANDIDATE_SQL = """
-    SELECT source_id, version,
-           content->>'text' AS text,
-           lower(valid_range) AS valid_from,
-           upper(valid_range) AS valid_to,
-           ts_rank_cd(tsv, plainto_tsquery('english', %(query)s)) AS lex_score,
-           (embedding <=> %(qembed)s::vector) AS vec_distance
-    FROM knowstore.corpus_items
-    WHERE valid_range @> %(as_of)s::date
-      AND upper_inf(record_range)
-      AND jurisdiction = %(jurisdiction)s
-      AND %(purpose)s = ANY(authorized_purposes)
-"""
 
 
 def _key(source_id: str, version: str) -> str:
@@ -63,48 +51,44 @@ class RetrievalService:
                 ),
             )
 
-        # 2. Permission-filtered candidate set (pre-ranking, in SQL).
-        rows = self._candidates(request)
+        # 2. Permission-filtered candidate set (pre-ranking) — via knowstore.
+        candidates = corpus_candidates(
+            self._conn,
+            query=request.query,
+            query_embedding=to_pgvector(embed(request.query)),
+            as_of=request.as_of,
+            jurisdiction=caller.jurisdiction,
+            purpose=caller.purpose,
+        )
 
         # 3. Rank the survivors: fuse lexical + vector orderings.
         lexical = [
-            _key(r["source_id"], r["version"])
-            for r in sorted(rows, key=lambda r: r["lex_score"], reverse=True)
-            if r["lex_score"] and r["lex_score"] > 0
+            _key(c.source_id, c.version)
+            for c in sorted(candidates, key=lambda c: c.lex_score or 0.0, reverse=True)
+            if c.lex_score and c.lex_score > 0
         ]
         vector = [
-            _key(r["source_id"], r["version"])
-            for r in sorted(rows, key=lambda r: r["vec_distance"])
+            _key(c.source_id, c.version)
+            for c in sorted(candidates, key=lambda c: c.vec_distance)
         ]
         fused = reciprocal_rank_fusion([lexical, vector])
 
-        by_key = {_key(r["source_id"], r["version"]): r for r in rows}
+        by_key: dict[str, CorpusCandidate] = {
+            _key(c.source_id, c.version): c for c in candidates
+        }
         ranked_keys = sorted(fused, key=lambda k: fused[k], reverse=True)[: request.top_k]
 
         items = [
             RetrievedItem(
-                source_id=by_key[k]["source_id"],
-                source_version=by_key[k]["version"],
-                content=by_key[k]["text"] or "",
+                source_id=by_key[k].source_id,
+                source_version=by_key[k].version,
+                content=by_key[k].text,
                 score=fused[k],
-                valid_from=by_key[k]["valid_from"],
-                valid_to=by_key[k]["valid_to"],
+                valid_from=by_key[k].valid_from,
+                valid_to=by_key[k].valid_to,
             )
             for k in ranked_keys
         ]
         return RetrievalResponse(
             request_id=request.request_id, as_of=request.as_of, items=items
         )
-
-    def _candidates(self, request: RetrievalRequest) -> list[dict]:
-        params = {
-            "query": request.query,
-            "qembed": to_pgvector(embed(request.query)),
-            "as_of": request.as_of,
-            "jurisdiction": request.caller.jurisdiction,
-            "purpose": request.caller.purpose,
-        }
-        with self._conn.cursor() as cur:
-            cur.execute(_CANDIDATE_SQL, params)
-            columns = [c.name for c in cur.description]
-            return [dict(zip(columns, row, strict=True)) for row in cur.fetchall()]

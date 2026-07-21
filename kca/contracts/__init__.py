@@ -24,6 +24,7 @@ from .dip_contract import (
     KnowledgeSourceRef,
     QualitySLO,
 )
+from .discovery import DiscoveryPointer, DiscoveryRequest, DiscoveryResult
 from .gateway import (
     GatewayResponse,
     TokenUsage,
@@ -70,6 +71,9 @@ ALL_CONTRACT_MODELS: tuple[type[ContractModel], ...] = (
     DIPCapability,
     DIPContract,
     DIPLifecycle,
+    DiscoveryPointer,
+    DiscoveryRequest,
+    DiscoveryResult,
     EvaluationGate,
     FreshnessSLO,
     GatewayResponse,
@@ -118,6 +122,9 @@ __all__ = [
     "DIPContract",
     "DIPLifecycle",
     "DIPLifecycleStatus",
+    "DiscoveryPointer",
+    "DiscoveryRequest",
+    "DiscoveryResult",
     "EvaluationGate",
     "FreshnessSLO",
     "GatewayResponse",

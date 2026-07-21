@@ -20,6 +20,9 @@ from kca.contracts import (
     DIPContract,
     DIPLifecycle,
     DIPLifecycleStatus,
+    DiscoveryPointer,
+    DiscoveryRequest,
+    DiscoveryResult,
     EvaluationGate,
     FreshnessSLO,
     GatewayResponse,
@@ -79,6 +82,35 @@ SAMPLES: dict[type, object] = {
         policy_version="v1",
         allowed=True,
         decided_at=_VALID,
+    ),
+    DiscoveryRequest: DiscoveryRequest(
+        request_id=UUID("0195f7a2-2222-7000-8000-000000000001"),
+        query="Why was app-88231 declined, and were there related operational incidents?",
+        caller=CALLER,
+        as_of=_AS_OF,
+    ),
+    DiscoveryPointer: DiscoveryPointer(
+        domain="op-risk",
+        source_id="control-library:CTRL-DQ-1",
+        version="v1",
+        title="Data-quality control: valuation-feed freshness",
+        jurisdiction="GB",
+    ),
+    DiscoveryResult: DiscoveryResult(
+        request_id=UUID("0195f7a2-2222-7000-8000-000000000001"),
+        proposed_domains=["credit-risk", "op-risk"],
+        confidence=0.82,
+        widened=False,
+        pointers=[
+            DiscoveryPointer(
+                domain="op-risk",
+                source_id="control-library:CTRL-DQ-1",
+                version="v1",
+                title="Data-quality control: valuation-feed freshness",
+                jurisdiction="GB",
+            )
+        ],
+        abstention=None,
     ),
     SourceVersion: SourceVersion(source_id="policy/credit/uk-mortgage", version="2026.02"),
     KnowledgeSourceRef: KnowledgeSourceRef(
