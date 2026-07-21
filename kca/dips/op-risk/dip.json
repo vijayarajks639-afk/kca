@@ -1,0 +1,100 @@
+{
+  "dip_id": "dip-op-risk",
+  "name": "Operational Risk DIP",
+  "domain": "op-risk",
+  "owner": "op-risk-platform-team",
+  "contract_version": "1.0.0",
+  "autonomy_mode": "decision_support",
+  "jurisdictions": ["GB", "US", "DE"],
+  "capabilities": [
+    {
+      "name": "investigate-incident",
+      "description": "Investigate a recorded operational-risk incident against the control library and RCSA state in force at the time of the event",
+      "boundary": "L3_reasoning"
+    }
+  ],
+  "knowledge_sources": [
+    {
+      "source_id": "control-library:CTRL-DQ-1",
+      "description": "Data-quality control: valuation-feed freshness monitoring"
+    },
+    {
+      "source_id": "control-library:CTRL-OUT-1",
+      "description": "System-availability control: critical feed outage response"
+    },
+    {
+      "source_id": "rcsa:RCSA-DQ-2026Q1",
+      "description": "RCSA residual-risk assessment for data-quality controls, Q1 2026"
+    }
+  ],
+  "effective_from": "2026-01-01",
+  "freshness_slo": {
+    "max_staleness_days": 1,
+    "measured_from": "latest knowledge_sources source_version publish date"
+  },
+  "quality_slo": {
+    "metric": "golden_set_pass_rate",
+    "threshold": 0.9,
+    "measured_by": "kca.evals golden-set runner (WP-18)"
+  },
+  "access_policy": {
+    "policy_version": "v1",
+    "allowed_roles": ["op-risk-investigator", "domain-steward", "auditor"]
+  },
+  "evaluation_gate": {
+    "golden_set_id": "op-risk-incident-v1",
+    "min_pass_rate": 0.9
+  },
+  "lifecycle": {
+    "status": "active",
+    "effective_to": null,
+    "superseded_by": null
+  },
+  "semantic_extensions": [],
+  "data_contracts": [
+    {
+      "dataset_id": "knowstore.op_risk_incidents",
+      "description": "Operational-risk incident records (WP-04 synthetic)",
+      "primary_key": "incident_id",
+      "freshness_slo": {
+        "max_staleness_days": 1,
+        "measured_from": "occurred_at"
+      },
+      "quality_checks": [
+        "not_null(incident_id)",
+        "loss_amount >= 0",
+        "severity in (low, medium, high)"
+      ]
+    }
+  ],
+  "tool_grants": [
+    {
+      "tool_name": "classify_incident_materiality",
+      "allowed_roles": ["op-risk-investigator", "auditor"],
+      "allowed_purposes": ["op_risk_investigation", "audit"]
+    }
+  ],
+  "abstention_rules": [
+    {
+      "reason_code": "MISSING_DECISION_RECORD",
+      "trigger": "No incident record exists for the requested incident_id."
+    },
+    {
+      "reason_code": "VERSION_CONFLICT",
+      "trigger": "The investigation draft cites a control or RCSA version that was not retrieved for the incident's occurred_at date."
+    },
+    {
+      "reason_code": "REDERIVATION_MISMATCH",
+      "trigger": "A figure in the draft (e.g. the recorded loss) does not match the incident record's own figures."
+    },
+    {
+      "reason_code": "AMBIGUOUS_TERM",
+      "trigger": "A control or risk term is requested without enough caller context to resolve a single sense."
+    },
+    {
+      "reason_code": "UNAUTHORISED_SOURCE",
+      "trigger": "The coarse authz gate denies the caller, or the permission filter leaves no control/RCSA source for the caller's role, purpose, and jurisdiction."
+    }
+  ],
+  "agent_instructions_ref": "agent_instructions.md"
+}

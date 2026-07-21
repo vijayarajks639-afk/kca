@@ -43,7 +43,7 @@ Do not start a WP before its dependencies are merged to main.
 - [x] [WP-21](WP-21.md) Ledger reconstruction report — deps: WP-11, WP-15
 
 ### E6 — Portability proof (Sprint 5)
-- [ ] [WP-22](WP-22.md) Operational Risk DIP — deps: WP-13, WP-18
+- [x] [WP-22](WP-22.md) Operational Risk DIP — deps: WP-13, WP-18
 - [ ] [WP-23](WP-23.md) Cross-domain discovery index — deps: WP-06, WP-22
 - [ ] [WP-24](WP-24.md) Reuse measurement — deps: WP-22
 - [ ] [WP-25](WP-25.md) Demo script + architecture v1.0 — deps: WP-21, WP-24

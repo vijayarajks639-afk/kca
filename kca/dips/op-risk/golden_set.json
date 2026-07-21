@@ -1,0 +1,30 @@
+{
+  "golden_set_id": "op-risk-incident-v1",
+  "dip_id": "dip-op-risk",
+  "cases": [
+    {
+      "case_id": "case-inc-0002-investigation",
+      "scenario": "Investigate incident inc-0002 (stale valuations used in affordability checks) against the data-quality control library.",
+      "expected_reason_codes": [],
+      "expected_summary": "Incident inc-0002 is a data-quality failure with a recorded loss of £12,500, classified non-material against the data-quality control CTRL-DQ-1 in force in February 2026."
+    },
+    {
+      "case_id": "case-unknown-incident-abstains",
+      "scenario": "Investigate incident inc-9999 (unknown).",
+      "expected_reason_codes": ["MISSING_DECISION_RECORD"],
+      "expected_summary": null
+    },
+    {
+      "case_id": "case-non-investigator-abstains",
+      "scenario": "A caller with no op_risk_investigation authority asks to investigate incident inc-0002.",
+      "expected_reason_codes": ["UNAUTHORISED_SOURCE"],
+      "expected_summary": null
+    },
+    {
+      "case_id": "case-stale-control-citation-abstains",
+      "scenario": "Investigate inc-0002 when the draft cites a control version not retrieved for the incident date.",
+      "expected_reason_codes": ["VERSION_CONFLICT"],
+      "expected_summary": null
+    }
+  ]
+}
