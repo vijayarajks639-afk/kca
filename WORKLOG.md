@@ -1380,3 +1380,58 @@ third-party.)
 - **Status:** implemented, verified live, backlog ticked, CI wired. To commit +
   push via SSH; PR to open via web. Awaiting architect review + merge before
   WP-21.
+
+## WP-21 — Ledger reconstruction report
+- **Branch:** `wp-21-ledger-reconstruction-report` (card's canonical name).
+- **Base:** off `main` (`fb491e1`, post-WP-20) in worktree `Projects/kca-wp21`.
+  Deps WP-11 (ledger) + WP-15 (journey), both merged.
+- **New sub-package `kca/platform/ledger/reports/`.** No new dependencies; no
+  `contracts/` changes; touches no other package's code (reads only via the
+  existing `LedgerRepository`).
+
+**The audit payoff of rule 4** — reconstruct a decision from the hash-chained
+ledger ALONE (no live stores): what did the system know, under which policy,
+when did it advise this decision.
+- `report.py` — `reconstruct_report(events)` is a **pure function of
+  `list[LedgerEvent]`**. Surfaces, all from the events: the steps executed
+  (`orchestrator_step:*` annotations), what it knew (retrieved source versions),
+  the policy in force (the policy-source subset), the governed model call(s)
+  (model, deployment boundary, rules version, prompt/output digests, inference
+  time = when), the three-clock timeline, the outcome (human-review-pending with
+  approver, or a reason-coded abstention), and **integrity** (verify_chain over
+  the full chain → `chain_verified`; a tampered event flips it to False but the
+  narrative still renders, so the tamper is visible). `segment_runs`/`latest_run`
+  scope the narrative to one decision; integrity is always checked over the full
+  chain from genesis. JSON + Markdown.
+- `reader.py` — `LedgerReconstructionReader(repository).report()`; depends on
+  the ledger and nothing else.
+- `cli.py` + `__main__.py` — `python -m kca.platform.ledger.reports` prints the
+  auditor Markdown for the latest run (reads an existing ledger; prepares/seeds
+  nothing — an auditor reads, doesn't run). Exit non-zero on a broken chain.
+
+**Acceptance criterion → evidence:** *Report for the March case matches journey
+facts with zero access to live stores* → `test_report_live.py` runs the real
+eight-step March journey (recording its 7 events), then reconstructs from
+`LedgerRepository` alone and asserts steps == the journey trace, policy in force
+== CP-001 v2-march, the model call == sonnet/private-cloud/v1 with 64-char
+digests, `human_review_required`, chain verified, head hash pinned — and a
+second test reconstructs from the bare event list (no connection) to show only
+events are needed. "Zero access to live stores" is also **structural**:
+`test_isolation.py` asserts no reports module imports knowstore / retrieval /
+rules_engine / semantics / gateway / router / orchestrator / authz / dips /
+synthetic. `test_reconstruct.py` proves the pure logic incl. tamper-detection
+and run-segmentation.
+
+**Flagged:** none — no deps, no contracts changes, self-contained under the
+ledger package. Not a CI gate (auditor tool, not a merge check); the live path
+is exercised by the WP's own live test.
+
+**Verified live**: full suite **485 passed, 0 skipped, 1 warning** (prior 471 +
+14 new, incl. 2 live reports tests — Postgres + pgvector + Keycloak up; alembic
+0006, no new migration; ruff clean). `python -m kca.platform.ledger.reports`
+prints the March auditor report (7 events, chain verified, CP-001 v2-march,
+claude-sonnet-5/private_cloud) exit 0. (The 1 warning is Starlette's own
+httpx-in-TestClient deprecation — third-party.)
+- **Status:** implemented, verified live, backlog ticked. Closes E5 (Assurance).
+  To commit + push via SSH; PR to open via web. Awaiting architect review +
+  merge before WP-22 (start of E6 — Operational Risk DIP).
